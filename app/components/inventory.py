@@ -16,8 +16,8 @@ def inventory_table() -> rx.Component:
             ),
         )
 
-    return rx.el.div(
-        rx.el.div(
+    return rx.box(
+        rx.box(
             rx.el.table(
                 rx.el.thead(
                     rx.el.tr(
@@ -33,7 +33,7 @@ def inventory_table() -> rx.Component:
                         InventoryState.filtered_tires,
                         lambda tire: rx.el.tr(
                             rx.el.td(
-                                rx.el.div(
+                                rx.box(
                                     rx.el.p(
                                         f"{tire['brand']} {tire['model']}",
                                         class_name="font-medium",
@@ -77,9 +77,9 @@ def inventory_table() -> rx.Component:
 def adjustment_modal() -> rx.Component:
     return rx.cond(
         InventoryState.show_adjustment_modal,
-        rx.el.div(
-            rx.el.div(
-                rx.el.div(
+        rx.box(
+            rx.box(
+                rx.box(
                     rx.el.h2("Adjust Inventory", class_name="text-xl font-bold"),
                     rx.el.button(
                         rx.icon("x"),
@@ -90,17 +90,17 @@ def adjustment_modal() -> rx.Component:
                 ),
                 rx.cond(
                     InventoryState.selected_tire_for_adjustment != None,
-                    rx.el.div(
+                    rx.box(
                         rx.el.p(
                             f"Adjusting stock for: {InventoryState.selected_tire_for_adjustment['brand']} {InventoryState.selected_tire_for_adjustment['model']}",
                             class_name="font-medium mb-4",
                         ),
-                        rx.el.div(
+                        rx.box(
                             rx.el.label(
                                 "Adjustment Amount (negative to decrease)",
                                 class_name="text-sm font-medium",
                             ),
-                            rx.el.input(
+                            rx.input(
                                 default_value=InventoryState.adjustment_amount,
                                 on_change=InventoryState.set_adjustment_amount,
                                 type="number",
@@ -108,12 +108,12 @@ def adjustment_modal() -> rx.Component:
                             ),
                             class_name="mb-4",
                         ),
-                        rx.el.div(
+                        rx.box(
                             rx.el.label(
                                 "Reason for Adjustment",
                                 class_name="text-sm font-medium",
                             ),
-                            rx.el.input(
+                            rx.input(
                                 default_value=InventoryState.adjustment_reason,
                                 on_change=InventoryState.set_adjustment_reason,
                                 placeholder="e.g. Received new shipment, Stock count correction",
@@ -124,7 +124,7 @@ def adjustment_modal() -> rx.Component:
                         class_name="py-4",
                     ),
                 ),
-                rx.el.div(
+                rx.box(
                     rx.el.button(
                         "Cancel",
                         on_click=InventoryState.close_inventory_adjustment_modal,
@@ -145,7 +145,7 @@ def adjustment_modal() -> rx.Component:
 
 
 def inventory_page_ui() -> rx.Component:
-    return rx.el.div(
+    return rx.box(
         rx.el.h1("Inventory Management", class_name="text-3xl font-bold mb-6"),
         inventory_table(),
         adjustment_modal(),

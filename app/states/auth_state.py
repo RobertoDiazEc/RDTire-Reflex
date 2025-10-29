@@ -1,9 +1,15 @@
 import reflex as rx
+import httpx
 from typing import TypedDict, Literal
 import hashlib
 import logging
 
-Role = Literal["Administrador", "Usuario Administrador", "Usuario Técnico"]
+BASE_API_URL = "tu_url_api_aqui"  # Reemplaza con tu URL de API real
+
+Role = Literal[
+    "Administrador", 
+    "Usuario Administrador", 
+    "Usuario Técnico"]
 
 
 class User(TypedDict):
@@ -45,19 +51,33 @@ class AuthState(rx.State):
         username = form_data.get("username", "").strip()
         password = form_data.get("password", "").strip()
         if not username or not password:
-            self.error_message = "Username and password are required."
+            self.error_message = "Username y password son requeridos."
             return
         user = self._get_user(username)
         if not user:
-            self.error_message = "Invalid username or password."
+            self.error_message = "Invalido el username o password."
             return
         password_hash = hashlib.sha256(password.encode()).hexdigest()
         if password_hash != user["password_hash"]:
-            self.error_message = "Invalid username or password."
+            self.error_message = "Invalido el password o username."
             return
         self.is_authenticated = True
         self.current_user = user
         return rx.redirect("/")
+    
+    @rx.event
+    async def register(self, form_data: dict):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(f"{BASE_API_URL}/register", json=form_data)
+                
+            if response.status_code == 201:
+                # Manejar registro exitoso
+                return rx.redirect("/login")
+            else:
+                self.error_message = "El registro falló. Por favor intenta nuevamente."
+        except Exception as e:
+            self.error_message = "Ocurrió un error. Por favor intenta nuevamente."
 
     @rx.event
     def logout(self):
