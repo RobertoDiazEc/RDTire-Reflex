@@ -1,29 +1,7 @@
 import reflex as rx
+from app.utils.constant import ADMIN_NAV, TECNICO_NAV, USER_ADMIN_NAV, INICIO_NAV, ESTILO_BOTON_PRINCIPAL
 from app.states.auth_state import AuthState
 
-ADMIN_NAV = [
-    {"name": "Dashboard", "path": "/", "icon": "layout-dashboard"},
-    {"name": "Products", "path": "/products", "icon": "package"},
-    {"name": "Inventory", "path": "/inventory", "icon": "boxes"},
-    {"name": "Sales", "path": "/sales", "icon": "shopping-cart"},
-    {"name": "Customers", "path": "/customers", "icon": "users"},
-    {"name": "Vehicles", "path": "/vehicles", "icon": "car"},
-    {"name": "Inspections", "path": "/inspections", "icon": "search"},
-    {"name": "Analytics", "path": "/analytics", "icon": "bar-chart-3"},
-    {"name": "Reports", "path": "/reports", "icon": "file-text"},
-]
-USER_ADMIN_NAV = [
-    {"name": "Dashboard", "path": "/", "icon": "layout-dashboard"},
-    {"name": "Products", "path": "/products", "icon": "package"},
-    {"name": "Inventory", "path": "/inventory", "icon": "boxes"},
-    {"name": "Sales", "path": "/sales", "icon": "shopping-cart"},
-    {"name": "Customers", "path": "/customers", "icon": "users"},
-    {"name": "Vehicles", "path": "/vehicles", "icon": "car"},
-]
-TECNICO_NAV = [
-    {"name": "Dashboard", "path": "/", "icon": "layout-dashboard"},
-    {"name": "Inspections", "path": "/inspections", "icon": "search"},
-]
 
 
 def sidebar_item(item: dict) -> rx.Component:
@@ -40,8 +18,8 @@ def sidebar() -> rx.Component:
         rx.el.div(
             rx.el.a(
                 rx.icon("circle-dot", class_name="h-6 w-6 text-emerald-600"),
-                rx.el.span("RDTire-Trading", class_name="font-semibold"),
-                href="/",
+                rx.el.span("RDTire-APP", class_name="font-semibold"),
+                href="/redxtire",
                 class_name="flex items-center gap-2 font-semibold",
             ),
             class_name="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6",
@@ -53,23 +31,43 @@ def sidebar() -> rx.Component:
                     ("Administrador", rx.foreach(ADMIN_NAV, sidebar_item)),
                     ("Usuario Administrador", rx.foreach(USER_ADMIN_NAV, sidebar_item)),
                     ("Usuario Técnico", rx.foreach(TECNICO_NAV, sidebar_item)),
+                    ("Inicio App", rx.foreach(INICIO_NAV, sidebar_item))
                 ),
                 class_name="flex-1 items-start px-2 text-sm font-medium lg:px-4",
             ),
             class_name="flex-1 overflow-auto py-2",
         ),
-        class_name="hidden border-r bg-gray-100/40 md:block",
+        class_name="hidden border-r border-gray-200 bg-gray-100/40 md:block",
     )
 
 
 def header() -> rx.Component:
     return rx.el.header(
         rx.el.div(class_name="w-full flex-1"),
-        rx.el.button(
-            rx.icon("log-out", class_name="mr-2 h-4 w-4"),
-            "Logout",
-            on_click=AuthState.logout,
-            class_name="flex items-center text-sm font-medium text-gray-600 hover:text-red-600 transition-colors",
+        rx.cond(
+                AuthState.current_user_role,
+                rx.el.button(
+                        rx.icon("log-out", class_name="mr-2 h-4 w-4"),
+                        "Logout",
+                        on_click=AuthState.logout,
+                        class_name="flex items-center text-sm font-medium text-gray-600 hover:text-red-600 transition-colors",
+                ),
+                   
+                rx.box(
+                    rx.el.a(
+                        rx.icon("circle-dot", class_name="h-6 w-6 text-emerald-600"),
+                        rx.el.span("RDTire-APP", class_name="font-semibold"),
+                        href="/",
+                        class_name="flex items-center gap-2 font-semibold",
+                    ),
+                    rx.button(
+                        rx.icon("log-in", class_name="mr-2 h-4 w-4"),
+                        "Login",
+                        on_click=lambda: rx.redirect("/login"),
+                        class_name="flex items-center text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors",
+                    ),
+                    class_name="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6",
+                ),    
         ),
         rx.el.button(
             rx.image(
@@ -78,19 +76,21 @@ def header() -> rx.Component:
             ),
             class_name="rounded-full border-2 border-transparent hover:border-emerald-600",
         ),
-        class_name="flex h-14 items-center gap-4 border-b bg-gray-100/40 px-4 lg:h-[60px] lg:px-6",
+        class_name="flex h-14 items-center gap-4 border-b border-gray-200 bg-gray-100/40 px-4 lg:h-[60px] lg:px-6",
     )
 
 
-def main_layout(child: rx.Component) -> rx.Component:
-    return rx.el.div(
+def main_layout(child: rx.Component, *args, **kwargs) -> rx.Component:
+    
+    return rx.box(
         sidebar(),
-        rx.el.div(
+        rx.box(
             header(),
             rx.el.main(
                 child, class_name="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6"
             ),
             class_name="flex flex-col flex-1 overflow-auto",
         ),
-        class_name="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]",
+        class_name="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[220px_1fr]",
     )
+

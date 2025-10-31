@@ -8,7 +8,7 @@ def register_page() -> rx.Component:
             rx.el.a(
                 rx.icon("circle-dot", class_name="h-8 w-8 text-emerald-600"),
                 rx.el.span(NOMBRE_APLICACION, class_name="text-2xl font-bold"),
-                href="/",
+                href="/register",
                 class_name="flex items-center gap-2 font-semibold mb-8",
             ),
             rx.el.h1("Registro", class_name="text-3xl font-bold mb-2"),

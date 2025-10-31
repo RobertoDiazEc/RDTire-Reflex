@@ -8,8 +8,8 @@ def admin_dashboard() -> rx.Component:
         rx.el.div(
             rx.el.h1("Admin Dashboard", class_name="text-3xl font-bold"),
             rx.el.p(
-                f"Welcome, {AuthState.current_user['username']}! You have full system access.",
-                class_name="text-gray-600",
+                f"Bienvenido, {AuthState.current_user['username']}! You have full system access.",
+                class_name="text-gray-600 center font-semibold",
             ),
         )
     )
@@ -23,7 +23,7 @@ def user_admin_dashboard() -> rx.Component:
                 f"Welcome, {AuthState.current_user['username']}! You can manage vehicles and tires.",
                 class_name="text-gray-600",
             ),
-        )
+        ),
     )
 
 
@@ -37,3 +37,5 @@ def tecnico_dashboard() -> rx.Component:
             ),
         )
     )
+
+

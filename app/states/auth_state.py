@@ -20,17 +20,17 @@ class User(TypedDict):
 
 USERS_DB: list[User] = [
     {
-        "username": "admin",
+        "username": "admin@redx.com",
         "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
         "role": "Administrador",
     },
     {
-        "username": "useradmin",
-        "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
+        "username": "usuario@redx.com",
+        "password_hash": hashlib.sha256("usuario123".encode()).hexdigest(),
         "role": "Usuario Administrador",
     },
     {
-        "username": "tecnico",
+        "username": "tecnico@redx.com",
         "password_hash": hashlib.sha256("tecnico123".encode()).hexdigest(),
         "role": "Usuario Técnico",
     },
@@ -46,8 +46,9 @@ class AuthState(rx.State):
         return next((user for user in USERS_DB if user["username"] == username), None)
 
     @rx.event
-    def login(self, form_data: dict[str, str]):
+    def login(self, form_data: dict):
         self.error_message = ""
+        print(form_data)
         username = form_data.get("username", "").strip()
         password = form_data.get("password", "").strip()
         if not username or not password:
@@ -63,7 +64,7 @@ class AuthState(rx.State):
             return
         self.is_authenticated = True
         self.current_user = user
-        return rx.redirect("/")
+        return rx.redirect("/redxtire")
     
     @rx.event
     async def register(self, form_data: dict):
@@ -84,7 +85,7 @@ class AuthState(rx.State):
         self.is_authenticated = False
         self.current_user = None
         self.error_message = ""
-        return rx.redirect("/login")
+        return rx.redirect("/")
 
     @rx.var
     def current_user_role(self) -> str:

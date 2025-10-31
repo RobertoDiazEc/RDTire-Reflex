@@ -1,22 +1,29 @@
 import reflex as rx
 from app.states.auth_state import AuthState
+from app.components.inicio_pag import inicio_section
+from app.components.navbar import navbar_buttons
+from app.components.footer import footer
 from app.pages.login_page import login_page
 from app.pages.register import register_page
-from app.pages.dashboards import (
-    admin_dashboard,
-    user_admin_dashboard,
-    tecnico_dashboard,
-)
+from app.pages.redxtire import redxtire_page
 
 
-@rx.page(on_load=AuthState.require_login)
+#on_load=AuthState.require_login
+@rx.page()
 def index() -> rx.Component:
-    return rx.match(
-        AuthState.current_user_role,
-        ("Administrador", admin_dashboard()),
-        ("Usuario Administrador", user_admin_dashboard()),
-        ("Usuario Técnico", tecnico_dashboard()),
-        login_page(),
+    return rx.fragment(
+        # rx.match(
+        #     AuthState.current_user_role,
+        #     ("Administrador", admin_dashboard()),
+        #     ("Usuario Administrador", user_admin_dashboard()),
+        #     ("Usuario Técnico", tecnico_dashboard()),
+        #     ("Inicio App",  inicio_dashboard())
+        #     #login_page(),
+           
+        # ),
+        navbar_buttons(),
+        inicio_section(),
+        footer(),
     )
 
 
@@ -100,13 +107,10 @@ def vehicles_page() -> rx.Component:
 
     return main_layout(vehicles_page_ui())
 
-@rx.page(route="/register")
-def register_page_iu() -> rx.Component:
-    return register_page()    
-
 
 app = rx.App(
     theme=rx.theme(appearance="light"),
+    stylesheets=["/animations.css"],
     head_components=[
         rx.el.link(rel="preconnect", href="https://fonts.googleapis.com"),
         rx.el.link(rel="preconnect", href="https://fonts.gstatic.com", cross_origin=""),
@@ -118,7 +122,8 @@ app = rx.App(
 )
 app.add_page(index)
 app.add_page(login_page, route="/login")
-app.add_page(register_page_iu, route="/register")
+app.add_page(register_page, route="/register")
+app.add_page(redxtire_page, route="/redxtire")
 app.add_page(products_page)
 app.add_page(inventory_page)
 app.add_page(sales_page)

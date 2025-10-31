@@ -95,42 +95,42 @@ def adjustment_modal() -> rx.Component:
                             f"Adjusting stock for: {InventoryState.selected_tire_for_adjustment['brand']} {InventoryState.selected_tire_for_adjustment['model']}",
                             class_name="font-medium mb-4",
                         ),
-                        rx.box(
-                            rx.el.label(
-                                "Adjustment Amount (negative to decrease)",
-                                class_name="text-sm font-medium",
-                            ),
-                            rx.input(
-                                default_value=InventoryState.adjustment_amount,
-                                on_change=InventoryState.set_adjustment_amount,
-                                type="number",
-                                class_name="w-full p-2 border rounded-md mt-1",
-                            ),
-                            class_name="mb-4",
-                        ),
-                        rx.box(
-                            rx.el.label(
-                                "Reason for Adjustment",
-                                class_name="text-sm font-medium",
-                            ),
-                            rx.input(
-                                default_value=InventoryState.adjustment_reason,
-                                on_change=InventoryState.set_adjustment_reason,
-                                placeholder="e.g. Received new shipment, Stock count correction",
-                                class_name="w-full p-2 border rounded-md mt-1",
-                            ),
-                            class_name="mb-4",
-                        ),
+                        # rx.box(
+                        #     rx.el.label(
+                        #         "Adjustment Amount (negative to decrease)",
+                        #         class_name="text-sm font-medium",
+                        #     ),
+                        #     rx.input(
+                        #         default_value=InventoryState.adjustment_amount,
+                        #         on_change=InventoryState.set_adjustment_amount,
+                        #         type="number",
+                        #         class_name="w-full p-2 border rounded-md mt-1",
+                        #     ),
+                        #     class_name="mb-4",
+                        # ),
+                        # rx.box(
+                        #     rx.el.label(
+                        #         "Reason for Adjustment",
+                        #         class_name="text-sm font-medium",
+                        #     ),
+                        #     rx.input(
+                        #         default_value=InventoryState.adjustment_reason,
+                        #         on_change=InventoryState.set_adjustment_reason,
+                        #         placeholder="e.g. Received new shipment, Stock count correction",
+                        #         class_name="w-full p-2 border rounded-md mt-1",
+                        #     ),
+                        #     class_name="mb-4",
+                        # ),
                         class_name="py-4",
                     ),
                 ),
                 rx.box(
-                    rx.el.button(
+                    rx.button(
                         "Cancel",
                         on_click=InventoryState.close_inventory_adjustment_modal,
                         class_name="px-4 py-2 bg-gray-200 rounded-md",
                     ),
-                    rx.el.button(
+                    rx.button(
                         "Save Adjustment",
                         on_click=InventoryState.save_inventory_adjustment,
                         class_name="px-4 py-2 bg-emerald-600 text-white rounded-md",

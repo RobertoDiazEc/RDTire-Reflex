@@ -80,8 +80,8 @@ def vehicle_modal() -> rx.Component:
                     rx.el.h2(
                         rx.cond(
                             VehicleState.is_editing_vehicle,
-                            "Edit Vehicle",
-                            "Add New Vehicle",
+                            "Editar Vehículo",
+                            "Nuevo Vehículo",
                         ),
                         class_name="text-xl font-bold",
                     ),
@@ -140,13 +140,13 @@ def vehicle_modal() -> rx.Component:
                     ),
                     rx.el.div(
                         rx.el.button(
-                            "Cancel",
+                            "Cancelar",
                             on_click=VehicleState.close_vehicle_modal,
                             class_name="px-4 py-2 bg-gray-200 rounded-md",
                             type="button",
                         ),
                         rx.el.button(
-                            "Save Vehicle",
+                            "Grabar",
                             type="submit",
                             class_name="px-4 py-2 bg-emerald-600 text-white rounded-md",
                         ),
@@ -221,7 +221,7 @@ def vehicle_detail_modal() -> rx.Component:
                         class_name="mt-2 space-y-1",
                     ),
                     rx.el.button(
-                        "Add Tire",
+                        "Nuevo",
                         on_click=lambda: TireManagementState.open_add_tire_to_vehicle_modal(
                             TireManagementState.selected_vehicle_for_detail["id"],
                             position,
@@ -282,12 +282,12 @@ def add_tire_to_vehicle_modal() -> rx.Component:
         rx.el.div(
             rx.el.div(
                 rx.el.h2(
-                    f"Add Tire to {TireManagementState.new_vehicle_tire['position'].replace('_', ' ').title()}",
+                    f"Añadir LLanta para {TireManagementState.new_vehicle_tire['position'].replace('_', ' ').title()}",
                     class_name="text-xl font-bold",
                 ),
                 rx.el.form(
                     rx.el.div(
-                        rx.el.label("Select Tire", class_name="font-medium"),
+                        rx.el.label("Selecionar Llanta", class_name="font-medium"),
                         rx.el.select(
                             rx.foreach(
                                 TireManagementState.tires,
@@ -304,7 +304,7 @@ def add_tire_to_vehicle_modal() -> rx.Component:
                         ),
                     ),
                     rx.el.div(
-                        rx.el.label("Installation Date", class_name="font-medium"),
+                        rx.el.label("Fecha de Instalacion", class_name="font-medium"),
                         rx.el.input(
                             type="date",
                             name="fecha_instalacion",
@@ -312,7 +312,7 @@ def add_tire_to_vehicle_modal() -> rx.Component:
                         ),
                     ),
                     rx.el.div(
-                        rx.el.label("Initial Depth (mm)", class_name="font-medium"),
+                        rx.el.label("Profundidad Inicial (mm)", class_name="font-medium"),
                         rx.el.input(
                             type="number",
                             default_value="8.0",
@@ -321,7 +321,7 @@ def add_tire_to_vehicle_modal() -> rx.Component:
                         ),
                     ),
                     rx.el.div(
-                        rx.el.label("Initial State", class_name="font-medium"),
+                        rx.el.label("Estado Inicial", class_name="font-medium"),
                         rx.el.select(
                             rx.el.option("Nueva", value="Nueva"),
                             rx.el.option("En uso", value="En uso"),
@@ -334,13 +334,13 @@ def add_tire_to_vehicle_modal() -> rx.Component:
                     ),
                     rx.el.div(
                         rx.el.button(
-                            "Cancel",
+                            "Cancelar",
                             on_click=TireManagementState.close_add_tire_to_vehicle_modal,
                             type="button",
                             class_name="px-4 py-2 bg-gray-200 rounded-md",
                         ),
                         rx.el.button(
-                            "Save Tire",
+                            "Grabar",
                             type="submit",
                             class_name="px-4 py-2 bg-emerald-600 text-white rounded-md",
                         ),
@@ -439,13 +439,13 @@ def tire_history_modal() -> rx.Component:
 def vehicles_page_ui() -> rx.Component:
     return rx.el.div(
         rx.el.div(
-            rx.el.h1("Vehicle Management", class_name="text-3xl font-bold"),
+            rx.el.h1("Mantenimieto Vehículo", class_name="text-3xl font-bold"),
             rx.el.p(
-                "Register and manage your fleet of vehicles.",
+                "Registre y gestione su flota de vehículos",
                 class_name="text-gray-500 mt-1",
             ),
             rx.el.button(
-                "Add Vehicle",
+                "Nuevo Vehículo",
                 on_click=VehicleState.open_add_vehicle_modal,
                 class_name="mt-4 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700",
             ),
