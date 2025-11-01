@@ -4,12 +4,8 @@ from typing import TypedDict, Literal
 import hashlib
 import logging
 
-BASE_API_URL = "tu_url_api_aqui"  # Reemplaza con tu URL de API real
-
-Role = Literal[
-    "Administrador", 
-    "Usuario Administrador", 
-    "Usuario Técnico"]
+BASE_API_URL = "tu_url_api_aqui"
+Role = Literal["Administrador", "Usuario Administrador", "Usuario Técnico"]
 
 
 class User(TypedDict):
@@ -65,19 +61,18 @@ class AuthState(rx.State):
         self.is_authenticated = True
         self.current_user = user
         return rx.redirect("/redxtire")
-    
+
     @rx.event
     async def register(self, form_data: dict):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(f"{BASE_API_URL}/register", json=form_data)
-                
             if response.status_code == 201:
-                # Manejar registro exitoso
                 return rx.redirect("/login")
             else:
                 self.error_message = "El registro falló. Por favor intenta nuevamente."
         except Exception as e:
+            logging.exception(f"Error during registration: {e}")
             self.error_message = "Ocurrió un error. Por favor intenta nuevamente."
 
     @rx.event

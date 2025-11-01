@@ -100,28 +100,10 @@ def sales_page_ui() -> rx.Component:
                         ),
                         rx.box(
                             rx.text("Customer", class_name="font-medium"),
-                            # rx.select(
-                            #     rx.option("Select Customer", value="", disabled=True),
-                            #     rx.foreach(
-                            #         SalesState.customers,
-                            #         lambda c: rx.option(
-                            #             c["name"], value=c["id"].to_string()
-                            #         ),
-                            #     ),
-                            #     on_change=SalesState.set_selected_customer_id,
-                            #     class_name="w-full p-2 border rounded-md mt-1",
-                            # ),
                             class_name="mt-4",
                         ),
                         rx.box(
                             rx.text("Payment Method", class_name="font-medium"),
-                            # rx.select(
-                            #     rx.option("Card", value="card"),
-                            #     rx.option("Cash", value="cash"),
-                            #     rx.option("Credit", value="credit"),
-                            #     on_change=SalesState.set_payment_method,
-                            #     class_name="w-full p-2 border rounded-md mt-1",
-                            # ),
                             class_name="mt-4",
                         ),
                         rx.button(

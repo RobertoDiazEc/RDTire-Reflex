@@ -95,32 +95,6 @@ def adjustment_modal() -> rx.Component:
                             f"Adjusting stock for: {InventoryState.selected_tire_for_adjustment['brand']} {InventoryState.selected_tire_for_adjustment['model']}",
                             class_name="font-medium mb-4",
                         ),
-                        # rx.box(
-                        #     rx.el.label(
-                        #         "Adjustment Amount (negative to decrease)",
-                        #         class_name="text-sm font-medium",
-                        #     ),
-                        #     rx.input(
-                        #         default_value=InventoryState.adjustment_amount,
-                        #         on_change=InventoryState.set_adjustment_amount,
-                        #         type="number",
-                        #         class_name="w-full p-2 border rounded-md mt-1",
-                        #     ),
-                        #     class_name="mb-4",
-                        # ),
-                        # rx.box(
-                        #     rx.el.label(
-                        #         "Reason for Adjustment",
-                        #         class_name="text-sm font-medium",
-                        #     ),
-                        #     rx.input(
-                        #         default_value=InventoryState.adjustment_reason,
-                        #         on_change=InventoryState.set_adjustment_reason,
-                        #         placeholder="e.g. Received new shipment, Stock count correction",
-                        #         class_name="w-full p-2 border rounded-md mt-1",
-                        #     ),
-                        #     class_name="mb-4",
-                        # ),
                         class_name="py-4",
                     ),
                 ),

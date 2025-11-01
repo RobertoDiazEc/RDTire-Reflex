@@ -8,14 +8,15 @@ from app.pages.dashboards import (
     tecnico_dashboard,
 )
 
+
 @rx.page(route="/redxtire", on_load=AuthState.require_login)
 def redxtire_page() -> rx.Component:
     return rx.box(
         rx.match(
-        AuthState.current_user_role,
-        ("Administrador", admin_dashboard()),
-        ("Usuario Administrador", user_admin_dashboard()),
-        ("Usuario Técnico", tecnico_dashboard()),
-        login_page(),
-        ),
-)
+            AuthState.current_user_role,
+            ("Administrador", admin_dashboard()),
+            ("Usuario Administrador", user_admin_dashboard()),
+            ("Usuario Técnico", tecnico_dashboard()),
+            login_page(),
+        )
+    )

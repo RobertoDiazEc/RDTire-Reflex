@@ -8,14 +8,9 @@ from app.pages.register import register_page
 from app.pages.redxtire import redxtire_page
 
 
-#on_load=AuthState.require_login
 @rx.page()
 def index() -> rx.Component:
-    return rx.fragment(
-        navbar_buttons(),
-        inicio_section(),
-        footer(),
-    )
+    return rx.fragment(navbar_buttons(), inicio_section(), footer())
 
 
 @rx.page(
@@ -84,8 +79,9 @@ def analytics_page() -> rx.Component:
 )
 def inspections_page() -> rx.Component:
     from app.components.layout import main_layout
+    from app.components.inspections import inspections_ui
 
-    return main_layout(rx.el.h1("Inspections Page"))
+    return main_layout(inspections_ui())
 
 
 @rx.page(

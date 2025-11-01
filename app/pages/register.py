@@ -2,6 +2,7 @@ import reflex as rx
 from app.utils.constant import NOMBRE_APLICACION
 from app.states.auth_state import AuthState
 
+
 def register_page() -> rx.Component:
     return rx.el.div(
         rx.el.div(

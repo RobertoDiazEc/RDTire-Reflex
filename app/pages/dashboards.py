@@ -23,7 +23,7 @@ def user_admin_dashboard() -> rx.Component:
                 f"Welcome, {AuthState.current_user['username']}! You can manage vehicles and tires.",
                 class_name="text-gray-600",
             ),
-        ),
+        )
     )
 
 
@@ -37,5 +37,3 @@ def tecnico_dashboard() -> rx.Component:
             ),
         )
     )
-
-

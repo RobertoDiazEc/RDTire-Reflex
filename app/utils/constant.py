@@ -1,7 +1,7 @@
 NOMBRE_APLICACION = "RDTire-APP"
-
-ESTILO_BOTON_PRINCIPAL = "flex bg-[#00edc6] px-8 py-4 items-center text-sm font-semibold rounded-md text-black shadow-lg hover:bg-white transition-all duration-300 transition-colors transform hover:scale-105 hover:shadow-xl",
-
+ESTILO_BOTON_PRINCIPAL = (
+    "flex bg-[#00edc6] px-8 py-4 items-center text-sm font-semibold rounded-md text-black shadow-lg hover:bg-white transition-all duration-300 transition-colors transform hover:scale-105 hover:shadow-xl",
+)
 ADMIN_NAV = [
     {"name": "Dashboard", "path": "/redxtire", "icon": "layout-dashboard"},
     {"name": "Productos", "path": "/products", "icon": "package"},
@@ -25,6 +25,4 @@ TECNICO_NAV = [
     {"name": "Dashboard", "path": "/redxtire", "icon": "layout-dashboard"},
     {"name": "Inspección", "path": "/inspections", "icon": "search"},
 ]
-INICIO_NAV = [
-    {"name": "Dashboard", "path": "/redxtire", "icon": "layout-dashboard"},
-]
+INICIO_NAV = [{"name": "Dashboard", "path": "/redxtire", "icon": "layout-dashboard"}]

@@ -312,7 +312,9 @@ def add_tire_to_vehicle_modal() -> rx.Component:
                         ),
                     ),
                     rx.el.div(
-                        rx.el.label("Profundidad Inicial (mm)", class_name="font-medium"),
+                        rx.el.label(
+                            "Profundidad Inicial (mm)", class_name="font-medium"
+                        ),
                         rx.el.input(
                             type="number",
                             default_value="8.0",
