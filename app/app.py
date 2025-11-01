@@ -12,15 +12,6 @@ from app.pages.redxtire import redxtire_page
 @rx.page()
 def index() -> rx.Component:
     return rx.fragment(
-        # rx.match(
-        #     AuthState.current_user_role,
-        #     ("Administrador", admin_dashboard()),
-        #     ("Usuario Administrador", user_admin_dashboard()),
-        #     ("Usuario Técnico", tecnico_dashboard()),
-        #     ("Inicio App",  inicio_dashboard())
-        #     #login_page(),
-           
-        # ),
         navbar_buttons(),
         inicio_section(),
         footer(),

@@ -2,3 +2,5 @@
 reflex==0.8.17a1
 PyGithub
 httpx
+psycopg[binary]
+python.dotenv
