@@ -257,11 +257,11 @@ TIRE_HISTORY_DATA: list[TireHistory] = [
 
 
 class BaseState(rx.State):
-    tires: list[Tire] = TIRE_DATA
-    customers: list[Customer] = CUSTOMER_DATA
-    vehicles: list[Vehicle] = VEHICLE_DATA
-    vehicle_tires: list[VehicleTire] = VEHICLE_TIRE_DATA
-    tire_history: list[TireHistory] = TIRE_HISTORY_DATA
+    tires: list[Tire] = []
+    customers: list[Customer] = []
+    vehicles: list[Vehicle] = []
+    vehicle_tires: list[VehicleTire] = []
+    tire_history: list[TireHistory] = []
     sidebar_open: bool = True
     search_query: str = ""
     filter_brand: str = ""
@@ -351,13 +351,15 @@ class BaseState(rx.State):
     @rx.var
     def filtered_tires(self) -> list[Tire]:
         query = self.search_query.lower()
-        tires = [
-            t
-            for t in self.tires
-            if query in t["brand"].lower()
-            or query in t["model"].lower()
-            or query in t["size"].lower()
-        ]
+        tires = self.tires
+        if query:
+            tires = [
+                t
+                for t in self.tires
+                if query in t["brand"].lower()
+                or query in t["model"].lower()
+                or query in t["size"].lower()
+            ]
         if self.filter_brand:
             tires = [t for t in tires if t["brand"] == self.filter_brand]
         if self.filter_size:
