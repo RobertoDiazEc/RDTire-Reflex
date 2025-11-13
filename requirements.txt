@@ -1,8 +1,14 @@
 
-reflex==0.8.17a1
+reflex==0.8.17
 PyGithub
 httpx
 sqlalchemy
-psycopg2-binary
+psycopg[binary]
 alembic
 python-dotenv
+pydantic
+pydantic[email]
+pydantic-settings
+python-decouple
+bcrypt
+

@@ -81,7 +81,7 @@ def inspection_modal() -> rx.Component:
                     ),
                     rx.el.div(
                         rx.el.label("Notas de Inspección", class_name="font-medium"),
-                        rx.el.textarea(
+                        rx.text_area(
                             on_change=InspectionState.set_inspection_notes,
                             placeholder="Añadir notas sobre la inspección...",
                             class_name="w-full p-2 border rounded-md mt-1 h-24",
@@ -114,7 +114,7 @@ def inspection_modal() -> rx.Component:
 def inspections_ui() -> rx.Component:
     return rx.el.div(
         rx.el.div(
-            rx.el.h1("Página de Inspección", class_name="text-3xl font-bold"),
+            rx.el.h1("Inspección", class_name="text-3xl font-bold"),
             rx.el.p(
                 "Seleccione un vehículo para iniciar la inspección de llantas.",
                 class_name="text-gray-500 mt-1",

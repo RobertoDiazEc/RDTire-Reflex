@@ -1,11 +1,15 @@
 import reflex as rx
-import httpx
+import re
+import bcrypt
 from typing import TypedDict, Literal
 import hashlib
 import logging
 from app.database.config import get_db, get_tenant_db
-from app.database.models import Usuario, Cliente
-from sqlalchemy.orm import Session
+from app.database.db_rdtire import Usuario, Cliente
+from decouple import config
+
+USER_MAESTRO_REDX = config("USER_MAESTRO_REDX")
+PASSWORD_MAESTRO_REDX = config("PASSWORD_MAESTRO_REDX")
 
 BASE_API_URL = "tu_url_api_aqui"
 Role = Literal["Administrador", "Usuario Administrador", "Usuario Técnico"]
@@ -22,85 +26,97 @@ class User(TypedDict):
 class AuthState(rx.State):
     error_message: str = ""
     is_authenticated: bool = False
-    current_user: User | None = None
-
-    def _get_user_from_db(self, username: str):
-        """Find a user across all active tenant schemas."""
-        try:
-            with get_db() as db:
-                all_clients = db.query(Cliente).filter(Cliente.activo == True).all()
-                for client in all_clients:
-                    with get_tenant_db(client.schema_name) as tenant_db:
-                        user = (
-                            tenant_db.query(Usuario)
-                            .filter(
-                                Usuario.username == username, Usuario.activo == True
-                            )
-                            .first()
-                        )
-                        if user:
-                            return (user, client)
-        except Exception as e:
-            logging.exception(f"Database error while fetching user: {e}")
-            self.error_message = "Error de base de datos. Contacte al administrador."
-        return (None, None)
+    #current_user: User | None = None
+    current_user: Usuario | None = Usuario()
+    cliente_actual: Cliente = Cliente()
+    user_role: str = ""
+    intent_login: bool = False
+    numero_intentos: int = 0
+    cliente_id_actual: int = 0
 
     @rx.event
     def login(self, form_data: dict):
         self.error_message = ""
         username = form_data.get("username", "").strip().lower()
         password = form_data.get("password", "").strip()
+  
         if not username or not password:
             self.error_message = "Username y password son requeridos."
             return
-        db_user, client = self._get_user_from_db(username)
-        if not db_user or not client:
-            self.error_message = "Inválido el username o password."
-            return
-        password_hash = hashlib.sha256(password.encode()).hexdigest()
-        if password_hash != db_user.password_hash:
-            self.error_message = "Inválido el password o username."
-            return
-        self.is_authenticated = True
-        self.current_user = {
-            "username": db_user.username,
-            "password_hash": db_user.password_hash,
-            "role": db_user.role,
-            "client_id": client.id,
-            "schema_name": client.schema_name,
-        }
-        return rx.redirect("/redxtire")
-
-    @rx.event
-    async def register(self, form_data: dict):
+        pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if not re.match(pattern, username):
+            return rx.window_alert("Correo no válido")
+        print( username + " -- " + password)
+        self.numero_intentos = self.numero_intentos + 1
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(f"{BASE_API_URL}/register", json=form_data)
-            if response.status_code == 201:
-                return rx.redirect("/login")
-            else:
-                self.error_message = "El registro falló. Por favor intenta nuevamente."
-        except Exception as e:
-            logging.exception(f"Error during registration: {e}")
-            self.error_message = "Ocurrió un error. Por favor intenta nuevamente."
+            if self.numero_intentos > 4:
+                self.error_message = "Cierre la pagina y vuelva a intentarlo. Número máximo de intentos de login excedido."
+                self.intent_login = True
+                return rx.window_alert("Número máximo de intentos de login excedido.")
+            
+            with rx.session() as session:
+                obj = session.exec(
+                        Usuario.select().where(
+                            Usuario.email == username
+                        )
+                    ).first()
+                
+                if obj:
+                    code_password = obj.password_hash
+                    if bcrypt.checkpw(password.encode(), code_password.encode()):
+                        self.is_authenticated = True
+                        self.current_user = obj
+                        self.user_role = obj.role
+                        self.cliente_id_actual = obj.cliente_id
+                        self.cliente_actual= session.exec(
+                               Cliente.select().where(
+                                    Cliente.id == obj.cliente_id
+                                )
+                            ).first()
+                        return rx.redirect("/redxtire")
+                
+                    # password_hash = hashlib.sha256(password.encode()).hexdigest()
+                    # if password_hash != db_user.password_hash:
+                else:
+                    
+                    if username == USER_MAESTRO_REDX and password == PASSWORD_MAESTRO_REDX:
+                        
+                        self.is_authenticated = True
+                        self.user_role = "Administrador"
+                        self.current_user = {
+                            "username": USER_MAESTRO_REDX,
+                            "password_hash": PASSWORD_MAESTRO_REDX,
+                            "role": "Administrador",
+                            "client_id": 0,
+                            "schema_name": "public",                           
+                        }
+                           
+                        return rx.redirect("/redxtire")
+                    self.error_message = "Inválido el password o username."
+                    return rx.window_alert("Inválido el password o username.")
+        
+        except Exception as e:       
+            return rx.window_alert(f"Error Ingreso Login-Usuario {form_data.get("username")}, error:--> {e}")
 
     @rx.event
     def logout(self):
         self.is_authenticated = False
         self.current_user = None
         self.error_message = ""
+        self.intent_login = False
+        self.numero_intentos = 0
         return rx.redirect("/")
 
     @rx.var
     def current_user_role(self) -> str:
         if self.current_user:
-            return self.current_user.get("role", "")
+            return self.current_user.role
         return ""
 
     @rx.var
     def client_schema(self) -> str:
         if self.current_user:
-            return self.current_user.get("schema_name", "public")
+            return "public"
         return "public"
 
     @rx.event
@@ -113,9 +129,9 @@ class AuthState(rx.State):
     def require_role(self, required_roles: list[Role]) -> rx.event.EventSpec | None:
         if not self.is_authenticated:
             return rx.redirect("/login")
-        if self.current_user and self.current_user["role"] not in required_roles:
+        if self.current_user and self.current_user.role not in required_roles:
             logging.warning(
-                f"User {self.current_user['username']} with role {self.current_user['role']} tried to access a page requiring one of {required_roles}"
+                f"User {self.current_user.username} with role {self.current_user.role} tried to access a page requiring one of {required_roles}"
             )
             return rx.redirect("/")
         return None

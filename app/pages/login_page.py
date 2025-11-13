@@ -48,6 +48,7 @@ def login_page() -> rx.Component:
                 rx.button(
                     "Iniciar Sesión",
                     type="submit",
+                    disabled=AuthState.intent_login,
                     class_name="w-full bg-emerald-600 text-white p-3 rounded-lg font-bold hover:bg-emerald-700 transition-colors",
                 ),
                 rx.box(

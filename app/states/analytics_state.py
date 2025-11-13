@@ -23,7 +23,7 @@ class AnalyticsState(SalesState):
 
     @rx.var
     def total_inventory_value(self) -> float:
-        return sum((t["price"] * t["stock"] for t in self.tires))
+        return sum((t.price * t.stock for t in self.tires))
 
     @rx.var
     def sales_chart_data(self) -> list[dict[str, float | str]]:

@@ -6,5 +6,6 @@ assets/external/
 .web/
 .states/
 .venv/
+.env
 __pycache__/
 /app/__pycache__/

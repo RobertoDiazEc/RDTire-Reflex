@@ -71,7 +71,8 @@ class InspectionState(TireManagementState):
                 }
                 self.tire_history.append(history_entry)
             except (ValueError, TypeError) as e:
-                logging.exception(f"Error processing inspection data: {e}")
+                print(f"Error processing inspection data: {e}")
+                #logging.exception
                 continue
         self.close_inspection_modal()
 

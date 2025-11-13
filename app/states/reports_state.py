@@ -34,18 +34,19 @@ class ReportsState(SalesState):
 
     @rx.var
     def revenue_by_category(self) -> list[dict[str, str | float]]:
-        category_revenue = {t_type: 0.0 for t_type in self.unique_types}
-        for sale in self.filtered_sales:
-            for item in sale["items"]:
-                for tire in self.tires:
-                    if tire["id"] == item["tire_id"]:
-                        category_revenue[tire["type"]] += (
-                            item["price_at_sale"] * item["quantity"]
-                        )
-                        break
-        return [
-            {"category": cat, "revenue": rev} for cat, rev in category_revenue.items()
-        ]
+        # category_revenue = {t_type: 0.0 for t_type in self.unique_types}
+        # for sale in self.filtered_sales:
+        #     for item in sale["items"]:
+        #         for tire in self.tires:
+        #             if tire["id"] == item["tire_id"]:
+        #                 category_revenue[tire["type"]] += (
+        #                     item["price_at_sale"] * item["quantity"]
+        #                 )
+        #                 break
+        # return [
+        #     {"category": cat, "revenue": rev} for cat, rev in category_revenue.items()
+        # ]
+        return []
 
     @rx.event
     def export_sales_csv(self) -> rx.event.EventSpec:

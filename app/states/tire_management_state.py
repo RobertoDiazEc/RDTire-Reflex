@@ -1,31 +1,46 @@
 import reflex as rx
 from app.states.vehicle_state import VehicleState
-from app.states.base_state import Vehicle, VehicleTire, TireHistory, Tire
+from app.database.db_rdtire import Vehiculo as Vehicle, VehicleTire, TireHistory, Tire
 import datetime
-from typing import cast
+from typing import cast, List
 
 
 class TireManagementState(VehicleState):
     show_vehicle_detail_modal: bool = False
-    selected_vehicle_for_detail: Vehicle | None = None
+    selected_vehicle_for_detail: List[Vehicle] = []
     show_add_tire_modal: bool = False
     show_tire_history_modal: bool = False
     selected_vehicle_tire: VehicleTire | None = None
-    new_vehicle_tire: VehicleTire = {
-        "id": 0,
-        "vehicle_id": 0,
-        "tire_id": 0,
-        "position": "",
-        "fecha_instalacion": "",
-        "estado": "Nueva",
-        "profundidad_actual": 8.0,
-    }
+    new_vehicle_tire: VehicleTire = VehicleTire()
+    tires_all_options: List[str] = []
 
+    #Obtengo informacion del vehiculo seleccionado
     @rx.event
     def open_vehicle_detail(self, vehicle_id: int):
-        self.selected_vehicle_for_detail = next(
-            (v for v in self.vehicles if v["id"] == vehicle_id), None
-        )
+        print(f" vehicle id en state {vehicle_id}")
+        if vehicle_id is None:
+            return rx.window_alert(" vehicle id es none ")
+        self.selected_vehicle_for_detail = []
+        with rx.session() as session:
+            vehiculo_seleccion = session.exec(
+                               Vehicle.select().where(
+                                    Vehicle.id == vehicle_id
+                                )
+                            ).all()
+            for seleccion in vehiculo_seleccion:
+                nuevo_registro = {
+                        "id": seleccion.id,
+                        "cliente_id": seleccion.cliente_id,
+                        "marca": seleccion.marca,
+                        "modelo": seleccion.modelo,
+                        "anio": seleccion.anio,
+                        "placa": seleccion.placa,
+                        "tipo": seleccion.tipo,
+                       }
+                self.selected_vehicle_for_detail.append(nuevo_registro) 
+                      #  = next(
+        #     (v for v in self.vehicles if v["id"] == vehicle_id), None
+        # )
         self.show_vehicle_detail_modal = True
 
     @rx.event
@@ -34,16 +49,25 @@ class TireManagementState(VehicleState):
         self.selected_vehicle_for_detail = None
 
     @rx.event
-    def open_add_tire_to_vehicle_modal(self, vehicle_id: int, position: str):
+    def open_add_tire_to_vehicle_modal(self, vehicle_id: int, cliente_id: int, position: str):
         self.new_vehicle_tire = {
             "id": 0,
             "vehicle_id": vehicle_id,
-            "tire_id": self.tires[0]["id"] if self.tires else 0,
+            "tire_id": self.tires.id if self.tires else 0,
             "position": position,
             "fecha_instalacion": datetime.date.today().isoformat(),
             "estado": "Nueva",
             "profundidad_actual": 8.0,
         }
+        #buscar todas las tires y almacenar en variable
+        with rx.session() as session:
+            tires_data = session.exec(
+                               Tire.select().where(
+                                    Tire.cliente_id == cliente_id and Tire.asignado_a_vehiculo == False
+                                )
+                            ).all()
+            self.tires_all_options = [f"{tire.id} - {tire.brand} {tire.model} {tire.size}" for tire in tires_data]  
+            
         self.show_add_tire_modal = True
 
     @rx.event
@@ -52,8 +76,9 @@ class TireManagementState(VehicleState):
 
     @rx.event
     def handle_new_vehicle_tire_change(self, field: str, value: str):
+        print(value.split(" - ")[-1])
         if field in ["tire_id", "vehicle_id"]:
-            self.new_vehicle_tire[field] = int(value)
+            self.new_vehicle_tire[field] = int(value.split(" - ")[0])
         elif field == "profundidad_actual":
             self.new_vehicle_tire[field] = float(value)
         else:
@@ -77,6 +102,10 @@ class TireManagementState(VehicleState):
         }
         self.tire_history.append(history_entry)
         self.show_add_tire_modal = False
+
+    @rx.event
+    def change_value_tires(self, value: str):
+        self.new_vehicle_tire["tire_id"] = int(value.split(" - ")[-1])
 
     @rx.event
     def remove_tire_from_vehicle(self, vehicle_tire_id: int):
@@ -103,11 +132,35 @@ class TireManagementState(VehicleState):
         self.show_tire_history_modal = False
         self.selected_vehicle_tire = None
 
+    @rx.event
+    def posicion_llanta_imagen(self, position: str) -> str:
+        if not self.selected_vehicle_for_detail:
+            return ""
+        vehicle_id = self.selected_vehicle_for_detail[0]["id"]
+        tires_s = {
+            vt["position"]: vt
+            for vt in self.vehicle_tires
+            if vt["vehicle_id"] == vehicle_id
+        }
+        positionsunica = [
+            "delantera_izquierda",
+            "delantera_derecha",
+            "trasera_izquierda",
+            "trasera_derecha",
+            "repuesto",
+        ]
+        
+        return {p: tires_s.get(p) for p in positionsunica}.get(position, "")
+        
+
+
     @rx.var
-    def vehicle_tires_by_position(self) -> dict[str, VehicleTire | None]:
+    def vehicle_tires_by_position(self) -> dict[str, VehicleTire]:
+        
         if not self.selected_vehicle_for_detail:
             return {}
-        vehicle_id = self.selected_vehicle_for_detail["id"]
+        vehicle_id = self.selected_vehicle_for_detail[0]["id"]
+        
         tires = {
             vt["position"]: vt
             for vt in self.vehicle_tires
@@ -142,7 +195,7 @@ class TireManagementState(VehicleState):
 
     @rx.var
     def tire_info_by_id(self) -> dict[str, Tire]:
-        return {str(t["id"]): t for t in self.tires}
+        return {str(t.id): t for t in self.tires}
 
     @rx.var
     def tire_info_for_history(self) -> Tire | None:

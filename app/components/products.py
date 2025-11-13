@@ -1,8 +1,9 @@
 import reflex as rx
 from app.states.base_state import BaseState, Tire
+from app.states.auth_state import AuthState
 
-
-def product_card(tire: Tire, **props) -> rx.Component:
+# , **props
+def product_card(tire: Tire) -> rx.Component:
     return rx.el.div(
         rx.el.div(
             rx.image(
@@ -13,6 +14,7 @@ def product_card(tire: Tire, **props) -> rx.Component:
         rx.el.div(
             rx.el.h3(tire["brand"], class_name="text-lg font-bold"),
             rx.el.p(tire["model"], class_name="text-sm text-gray-500"),
+            rx.el.p(tire["dot"], class_name="text-sm text-gray-500"),
             rx.el.div(
                 rx.el.p(f"${tire['price']:.2f}", class_name="text-lg font-semibold"),
                 rx.el.p(f"Stock: {tire['stock']}", class_name="text-sm text-gray-600"),
@@ -22,29 +24,35 @@ def product_card(tire: Tire, **props) -> rx.Component:
         ),
         on_click=lambda: BaseState.open_product_detail_modal(tire),
         class_name="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-lg transition-shadow cursor-pointer flex flex-col justify-between",
-        **props,
+        #**props,
     )
 
 
 def products_page_ui() -> rx.Component:
     return rx.el.div(
         rx.el.div(
-            rx.el.h1("Products", class_name="text-3xl font-bold"),
+            #rx.el.h1("Products", class_name="text-3xl font-bold"),
             rx.el.p(
-                "Browse and manage your tire products.", class_name="text-gray-500 mt-1"
+                "Ingreso de Neumaticos .", class_name="text-gray-500 mt-1"
             ),
             rx.el.button(
-                "Add New Product",
-                on_click=BaseState.open_add_product_modal,
+                "Nuevo",
+                on_click=BaseState.open_add_product_modal(AuthState.current_user["cliente_id"]),
                 class_name="mt-4 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700",
+            ),
+            rx.button(
+                rx.icon("table-cells-split", size=20),
+                rx.text("Mostrar", size="3"),
+                on_click=BaseState.mostrar_tires(AuthState.current_user["cliente_id"]),
             ),
             class_name="mb-6",
         ),
         rx.el.div(
-            rx.foreach(BaseState.filtered_tires, product_card),
+            # BaseState.filtered_tires
+            rx.foreach(BaseState.tires, product_card),
             class_name="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6",
         ),
-        product_detail_modal(),
+        #product_detail_modal(),
         add_product_modal(),
         class_name="p-4 md:p-6",
     )
@@ -57,7 +65,7 @@ def product_detail_modal() -> rx.Component:
             rx.el.div(
                 rx.el.div(
                     rx.el.h2(
-                        f"{BaseState.selected_tire['brand']} {BaseState.selected_tire['model']}",
+                        f"{BaseState.selected_tire['brand']} {BaseState.selected_tire['size']}",
                         class_name="text-2xl font-bold",
                     ),
                     rx.el.button(
@@ -74,7 +82,7 @@ def product_detail_modal() -> rx.Component:
                     ),
                     rx.el.div(
                         rx.el.div(
-                            rx.el.p("Size:", class_name="font-semibold"),
+                            rx.el.p("model:", class_name="font-semibold"),
                             rx.el.p(BaseState.selected_tire["size"]),
                         ),
                         rx.el.div(
@@ -137,7 +145,7 @@ def add_product_modal() -> rx.Component:
         rx.el.div(
             rx.el.div(
                 rx.el.div(
-                    rx.el.h2("Add New Product", class_name="text-xl font-bold"),
+                    rx.el.h2("Nuevo", class_name="text-xl font-bold"),
                     rx.el.button(
                         rx.icon("x", class_name="h-4 w-4"),
                         on_click=BaseState.close_add_product_modal,
@@ -147,9 +155,10 @@ def add_product_modal() -> rx.Component:
                 ),
                 rx.el.form(
                     rx.el.div(
-                        form_field("Brand", "brand", "e.g. Michelin"),
-                        form_field("Model", "model", "e.g. Pilot Sport 4S"),
-                        form_field("Size", "size", "e.g. 255/35R19"),
+                        form_field("Marca", "brand", "e.g. Michelin"),
+                        form_field("Medida", "size", "e.g. 255/35R19"),
+                        form_field("DOT", "dot", "e.g. 1421"),
+                        form_field("Modelo", "model", "e.g. Pilot Sport 4S"),
                         form_field("Type", "type", "e.g. Performance"),
                         form_field("Season", "season", "e.g. Summer"),
                         form_field("Speed Rating", "speed_rating", "e.g. Y"),
@@ -163,18 +172,18 @@ def add_product_modal() -> rx.Component:
                     ),
                     rx.el.div(
                         rx.el.button(
-                            "Cancel",
+                            "Cancelar",
                             on_click=BaseState.close_add_product_modal,
                             class_name="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200",
                         ),
                         rx.el.button(
-                            "Add Product",
+                            "Grabar",
                             type="submit",
                             class_name="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700",
                         ),
                         class_name="flex justify-end gap-2 pt-4 border-t",
                     ),
-                    on_submit=BaseState.add_product,
+                    on_submit=BaseState.save_new_product,
                 ),
                 class_name="relative bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl",
             ),

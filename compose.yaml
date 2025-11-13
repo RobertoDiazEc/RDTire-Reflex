@@ -1,0 +1,33 @@
+# 
+# Docker Compose configuration for PostgreSQL database service
+services:
+  db_service:
+    image: postgres:17.5
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=db-password
+      - POSTGRES_DB=mydb
+    # env_file:
+    #   - .env.sample-db
+    volumes:
+      - db_service_volume:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: rdiaz@redx.com
+      PGADMIN_DEFAULT_PASSWORD: RD741258ec.
+    depends_on:
+      - db_service 
+
+volumes:
+  db_service_volume:
+
+
+  #docker compose -f 'compose.yaml' up -d --build /o probar este comando/ docker-compose up -d
+ #debe ejecutarsse sin errores
+ #pgadmin se accede por el navegador en http://localhost:8080

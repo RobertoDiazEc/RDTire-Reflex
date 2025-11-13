@@ -46,4 +46,5 @@ class InventoryState(BaseState):
 
     @rx.var
     def low_stock_tires(self) -> list[Tire]:
-        return [t for t in self.tires if t["stock"] < 10]
+        return []
+    # [t for t in self.tires if t["stock"] < 10]

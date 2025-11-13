@@ -1,43 +1,41 @@
 import reflex as rx
-from app.states.base_state import BaseState, Vehicle, VehicleTire, TireHistory
+from app.states.base_state import BaseState
+from app.states.auth_state import AuthState
 import datetime
 import logging
 from typing import cast
+from app.database.db_rdtire import Vehiculo as Vehicle
+from app.database.schemas import VehiculoSchemaNuevo
+from typing import List
+from pydantic import ValidationError
+
 
 
 class VehicleState(BaseState):
+    form_data: dict = {}
+    errors: dict = {}
+    has_error: bool = False
     show_vehicle_modal: bool = False
     is_editing_vehicle: bool = False
     selected_vehicle: Vehicle | None = None
-    new_vehicle: Vehicle = {
-        "id": 0,
-        "placa": "",
-        "marca": "",
-        "modelo": "",
-        "ano": 2024,
-        "tipo": "",
-        "fecha_registro": "",
-    }
+    new_vehicle: Vehicle = Vehicle()
+    vehicle_creado_por: str = ""
+    vehicle_cliente_id: int = 0 
+    
 
     @rx.event
-    def open_add_vehicle_modal(self):
+    def open_add_vehicle_modal(self, creado_por: str, cliente_id: int):
         self.is_editing_vehicle = False
-        self.new_vehicle = {
-            "id": 0,
-            "placa": "",
-            "marca": "",
-            "modelo": "",
-            "ano": datetime.date.today().year,
-            "tipo": "",
-            "fecha_registro": "",
-        }
+        self.new_vehicle = Vehicle()
         self.show_vehicle_modal = True
+        self.vehicle_creado_por = creado_por
+        self.vehicle_cliente_id = cliente_id
 
     @rx.event
     def open_edit_vehicle_modal(self, vehicle: Vehicle):
         self.is_editing_vehicle = True
         self.selected_vehicle = vehicle
-        self.new_vehicle = vehicle.copy()
+        self.new_vehicle = vehicle
         self.show_vehicle_modal = True
 
     @rx.event
@@ -48,32 +46,82 @@ class VehicleState(BaseState):
 
     @rx.event
     def handle_vehicle_change(self, field: str, value: str):
-        if field == "ano":
-            try:
-                self.new_vehicle[field] = int(value)
-            except ValueError as e:
-                logging.exception(f"Error converting ano to int: {e}")
-        else:
-            self.new_vehicle[field] = value
-
+        pass
+        
     @rx.event
-    def save_vehicle(self):
-        if self.is_editing_vehicle and self.selected_vehicle:
-            vehicle_index = next(
-                (
-                    i
-                    for i, v in enumerate(self.vehicles)
-                    if v["id"] == self.selected_vehicle["id"]
-                ),
-                -1,
-            )
-            if vehicle_index != -1:
-                self.vehicles[vehicle_index] = self.new_vehicle.copy()
-        else:
-            new_id = max([v["id"] for v in self.vehicles]) + 1 if self.vehicles else 1
-            self.new_vehicle["id"] = new_id
-            self.new_vehicle["fecha_registro"] = datetime.date.today().isoformat()
-            self.vehicles.append(self.new_vehicle.copy())
+    def mostrar_vehiculos(self, cliente_id: int):
+        #self.mostrar_usuario_tabla = True
+        with rx.session() as session:
+            self.vehicles= session.exec(
+                               Vehicle.select().where(
+                                    cliente_id == cliente_id
+                                )
+                            ).all()
+            
+    @rx.event
+    def save_vehicle(self, form_data: dict):
+        self.form_data = form_data
+        with rx.session() as session:
+            if self.is_editing_vehicle and self.selected_vehicle:
+                try:
+                    #print(self.form_data)
+                    instance_data = VehiculoSchemaNuevo.model_validate(form_data)
+                except ValidationError as e:
+                    for err in e.errors():
+                        field_name = err['loc'][0] if err['loc'] else 'general'
+                        self.errors[field_name] = err['msg']
+                    self.has_error = True 
+                    return  rx.window_alert(self.errors)  
+                except Exception as er:
+                    self.has_error = True
+                    self.errors = {
+                        "general": f"se genero un error al editar: {str(er)}"
+                    }
+                    return rx.window_alert(self.errors())
+                vehicle_actual=session.exec(
+                    Vehicle.select()
+                    .where(Vehicle.id == self.new_vehicle.id)
+                    ).first()
+                vehicle_actual.placa = instance_data.placa
+                vehicle_actual.marca = instance_data.marca
+                vehicle_actual.modelo = instance_data.modelo
+                vehicle_actual.anio = instance_data.anio
+                vehicle_actual.tipo = instance_data.tipo    
+                
+                
+                #print(instance)
+                session.add(vehicle_actual)
+
+                session.commit()
+                session.refresh(vehicle_actual)
+
+            else:
+                try:
+                    #print(self.form_data)
+                    
+                    instance_data = VehiculoSchemaNuevo.model_validate(form_data)
+                except ValidationError as e:
+                    for err in e.errors():
+                        field_name = err['loc'][0] if err['loc'] else 'general'
+                        self.errors[field_name] = err['msg']
+                    self.has_error = True 
+                    return  rx.window_alert(self.errors)  
+                except Exception as er:
+                    self.has_error = True
+                    self.errors = {
+                        "general": f"se genero un error al Crear : {str(er)}"
+                    }
+                    return rx.window_alert(self.errors())
+                
+                instance = Vehicle(**instance_data.model_dump())
+                instance.creado_por = self.vehicle_creado_por
+                instance.cliente_id = self.vehicle_cliente_id
+                #print(instance)
+                session.add(instance)
+
+                session.commit()
+
+                session.refresh(instance)
         self.close_vehicle_modal()
 
     @rx.event

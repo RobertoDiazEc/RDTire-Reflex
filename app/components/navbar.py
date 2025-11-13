@@ -1,6 +1,8 @@
 import reflex as rx
 from app.utils.constant import ESTILO_BOTON_PRINCIPAL
 
+def mobile_navbar_link(url:str):
+    return rx.redirect(url)
 
 def navbar_buttons() -> rx.Component:
     return rx.box(
@@ -56,13 +58,8 @@ def navbar_buttons() -> rx.Component:
                 rx.menu.root(
                     rx.menu.trigger(rx.icon("menu", size=30)),
                     rx.menu.content(
-                        rx.menu.item("Home"),
-                        rx.menu.item("About"),
-                        rx.menu.item("Pricing"),
-                        rx.menu.item("Contact"),
-                        rx.menu.separator(),
-                        rx.menu.item("Log in"),
-                        rx.menu.item("Sign up"),
+                        rx.menu.item("Log in", on_click=lambda: mobile_navbar_link("/login")),
+                        rx.menu.item("Sign up", on_click=lambda: mobile_navbar_link("/register")),
                     ),
                     justify="end",
                 ),
