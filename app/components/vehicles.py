@@ -5,11 +5,13 @@ from app.states.base_state import Tire, VehicleTire, TireHistory
 from app.database.db_rdtire import Vehiculo as Vehicle
 from app.states.auth_state import AuthState
 from app.components.card_redx import card_vehicles
+from app.utils.form_field import form_field_change_real,form_field_password,form_field_desable
 from app.components.imagen_mapa import image_map_view
-from app.utils.form_field import form_field_despegable, form_field_input    
+from app.utils.form_field import form_field_despegable, form_field_input, form_field_input_desabilitado  
 
 
-
+def from_vehiculo_add() -> rx.Component:
+    return 
 
 def vehicle_card(vehicle: Vehicle) -> rx.Component:
     return rx.el.div(
@@ -25,11 +27,12 @@ def vehicle_card(vehicle: Vehicle) -> rx.Component:
                 class_name="flex flex-col",
             ),
             rx.el.div(
-                rx.el.button(
-                    rx.icon("pencil", class_name="h-4 w-4"),
-                    on_click=lambda: VehicleState.open_edit_vehicle_modal(vehicle),
-                    class_name="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md",
-                ),
+                # rx.el.button(
+                #     rx.icon("pencil", class_name="h-4 w-4"),
+                #     on_click=lambda: VehicleState.open_edit_vehicle_modal(vehicle),
+                #     class_name="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md",
+                # ),
+                vehicle_edit_lateral(vehicle),
                 rx.el.button(
                     rx.icon("trash-2", class_name="h-4 w-4"),
                     on_click=lambda: VehicleState.delete_vehicle(vehicle["id"]),
@@ -64,6 +67,149 @@ def vehicle_card(vehicle: Vehicle) -> rx.Component:
         class_name="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md ",
     )
 
+def vehicle_edit_lateral(vehicles: Vehicle) -> rx.Component:
+    return rx.el.div(
+        rx.el.button(
+                    rx.icon("pencil", class_name="h-4 w-4"),
+                    on_click=lambda: VehicleState.open_edit_vehicle_modal(vehicles),
+                    class_name="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md",
+                ),
+        rx.cond(
+        VehicleState.is_editing_vehicle,
+           vehicle_modal(), 
+        ),
+        class_name="p-1 md:p-1"
+
+    )
+
+def vehicle_new_edit() -> rx.Component:
+ 
+    return rx.dialog.root(
+        rx.dialog.trigger(
+            rx.button(
+                rx.icon("plus", size=20),
+                rx.text("Nuevo ", size="3"),
+                on_click=VehicleState.open_add_vehicle_modal(
+                    AuthState.current_user["username"],
+                    AuthState.current_user["cliente_id"]),
+                ),
+        ),
+        rx.dialog.content(
+            rx.dialog.title(
+            "Nuevo Vehiculo",
+            ),
+            #  rx.dialog.description(
+            #      "Rellene el formulario con la información del usuario",
+            #  ),
+            # usuario_modal(),
+            rx.el.div(
+            rx.form(
+            rx.el.div(
+              
+                    form_field_change_real(
+                        "License Placa",
+                        "placa",
+                        VehicleState.new_vehicle["placa"],
+                        lambda val: VehicleState.handle_vehicle_change(
+                            "placa", val
+                        ),
+                        "e.g. PCJ-1234",
+                        ),
+                    form_field_change_real(
+                        "Marca",
+                        "marca",
+                        VehicleState.new_vehicle["marca"],
+                        lambda val: VehicleState.handle_vehicle_change(
+                            "marca", val
+                        ),
+                        "e.g. Toyota",
+                        ),
+                    form_field_change_real(
+                        "Modelo",
+                        "modelo",
+                        VehicleState.new_vehicle["modelo"],
+                        lambda val: VehicleState.handle_vehicle_change(
+                            "modelo", val
+                        ),
+                        "e.g. Hilux",
+                        ),
+                    form_field_change_real(
+                        "Año",
+                        "anio",
+                        VehicleState.new_vehicle["anio"].to_string(),
+                        lambda val: VehicleState.handle_vehicle_change("anio", val),
+                        "e.g. 2022",
+                        type="number",
+                        ),
+                    form_field_change_real(
+                        "Tipo de Vehiculo",
+                        "tipo",
+                        VehicleState.new_vehicle["tipo"],
+                        lambda val: VehicleState.handle_vehicle_change("tipo", val),
+                        "e.g. Truck",
+                        ),
+                    form_field_change_real(
+                        "Odometro (KM)",
+                        "odometro_actual",
+                        VehicleState.new_vehicle["odometro_actual"],
+                        lambda val: VehicleState.handle_vehicle_change("odometro_actual", val),
+                        "e.g. 13000 ",
+                        ),    
+                    form_field_despegable(
+                            "Tipo Combustible",
+                            ["Gasolina", "Diesel"],
+                            "tipo_combustible",
+                            lambda val: VehicleState.handle_vehicle_change("tipo_combustible", val),
+                        ),
+                    form_field_change_real(
+                        "Capacidad Tanque en Galones",
+                        "capacidad_tanque",
+                        VehicleState.new_vehicle["capacidad_tanque"],
+                        lambda val: VehicleState.handle_vehicle_change("capacidad_tanque", val),
+                        "e.g. 13 ",
+                        ),
+                    form_field_change_real(
+                        "Medida de Neumatico",
+                        "medida_tire",
+                        VehicleState.new_vehicle["medida_tire"],
+                        lambda val: VehicleState.handle_vehicle_change("medida_tire", val),
+                        "e.g. 215/80R17.5",
+                        ),    
+                    form_field_change_real(
+                        "Numero de Neumaticos 4 o 6",
+                        "numero_tire",
+                        VehicleState.new_vehicle["numero_tire"],
+                        lambda val: VehicleState.handle_vehicle_change("numero_tire", val),
+                        "e.g. 4",
+                        type="number"
+                        ), 
+      
+                    rx.flex(
+                        rx.dialog.close(
+                            rx.button(
+                                "Cancelar",
+                                variant="soft",
+                                color_scheme="gray",
+                            ),
+                        ),
+                        rx.dialog.close(
+                            rx.button("Grabar", type="submit"),
+                        ),
+                        spacing="3",
+                        justify="end",
+                    ),
+
+                class_name="grid grid-cols-1 md:grid-cols-2 gap-4 py-4", 
+            ),
+                on_submit=VehicleState.save_vehicle,
+                reset_on_submit=False,
+
+            ),
+            class_name="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl",
+            ),
+           max_width="850px",
+         )
+    )
 
 def vehicle_modal() -> rx.Component:
     def form_field(
@@ -109,15 +255,15 @@ def vehicle_modal() -> rx.Component:
                 ),
                 rx.el.form(
                     rx.el.div(
-                        form_field(
-                            "License Placa",
-                            "placa",
-                            VehicleState.new_vehicle["placa"],
-                            lambda val: VehicleState.handle_vehicle_change(
-                                "placa", val
-                            ),
-                            "e.g. PCJ-1234",
-                        ),
+                        # form_field(
+                        #     "License Placa",
+                        #     "placa",
+                        #     VehicleState.new_vehicle["placa"],
+                        #     lambda val: VehicleState.handle_vehicle_change(
+                        #         "placa", val
+                        #     ),
+                        #     "e.g. PCJ-1234",
+                        # ),
                         form_field(
                             "Marca",
                             "marca",
@@ -144,12 +290,49 @@ def vehicle_modal() -> rx.Component:
                             "e.g. 2022",
                             type="number",
                         ),
-                        form_field(
-                            "Type",
+                         form_field(
+                            "Tipo Vehiculo",
                             "tipo",
                             VehicleState.new_vehicle["tipo"],
-                            lambda val: VehicleState.handle_vehicle_change("tipo", val),
+                            lambda val: VehicleState.handle_vehicle_change(
+                                "tipo", val
+                            ),
                             "e.g. Truck",
+                        ),    
+                        form_field(
+                            "Odometro (KM)",
+                            "odometro_actual",
+                            VehicleState.new_vehicle["odometro_actual"],
+                            lambda val: VehicleState.handle_vehicle_change("odometro_actual", val),
+                            "e.g. 10000",
+                        ),
+                        form_field(
+                            "Tipo Combustible Solo (Gasolina - Diesel)",
+                            "tipo_combustible",
+                            VehicleState.new_vehicle["tipo_combustible"],
+                            lambda val: VehicleState.handle_vehicle_change("tipo_combustible", val),
+                            "e.g. Diesel / Gasolina",
+                        ),
+                        form_field(
+                            "Capacidad Tanque solo Galones",
+                            "capacidad_tanque",
+                            VehicleState.new_vehicle["capacidad_tanque"],
+                            lambda val: VehicleState.handle_vehicle_change("capacidad_tanque", val),
+                            "e.g. 10 (galones)",
+                        ),
+                        form_field(
+                            "Medida Neumatico",
+                            "medida_tire",
+                            VehicleState.new_vehicle["medida_tire"],
+                            lambda val: VehicleState.handle_vehicle_change("medida_tire", val),
+                            "e.g. 215/75R17.5",
+                        ),
+                        form_field(
+                            "Numero Neumaticos, ",
+                            "numero_tire",
+                            VehicleState.new_vehicle["numero_tire"],
+                            lambda val: VehicleState.handle_vehicle_change("numero_tire", val),
+                            "e.g. 4 / 6 (neumaticos)",
                         ),
                         class_name="grid grid-cols-1 md:grid-cols-2 gap-4 py-4",
                     ),
@@ -179,19 +362,19 @@ def edit_vehicle_button(vehicle: Vehicle) -> rx.Component:
     return rx.el.div(
         rx.el.button(
                     rx.hstack(
-                    rx.icon("circle-dot", color="#04395cf1", class_name="h-8 w-8"),
-                    rx.text("Vehiculo - Llantas", size="3"),
-                    on_click=TireManagementState.open_vehicle_detail(vehicle["id"]),
-                    padding="2"
+                        rx.icon("circle-dot", color="#04395cf1", class_name="h-8 w-8"),
+                        rx.text("Asignar Llantas", size="3"),
+                        on_click=TireManagementState.open_vehicle_detail(vehicle["id"]),
+                        padding="2"
                      ),
-                    class_name="p-4 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-shadow cursor-pointer",
+                    #class_name="p-4 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-shadow cursor-pointer",
+                    class_name="mt-4 w-full bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors",
                 ),
                 rx.cond(
                     TireManagementState.show_vehicle_detail_modal,
                     vehicle_detail_modal(),
                 )
     )
-
 
 def vehicle_detail_modal() -> rx.Component:
 
@@ -227,9 +410,11 @@ def vehicle_detail_modal() -> rx.Component:
                     vehicle_tire,
                     rx.el.div(
                         rx.el.p(
-                            f"{TireManagementState.tire_info_by_id.get(vehicle_tire['tire_id'], {}).get('brand', 'N/A')} {TireManagementState.tire_info_by_id.get(vehicle_tire['tire_id'], {}).get('model', 'N/A')}",
+                            f"{TireManagementState.tire_info_by_id.get(vehicle_tire['tire_id']).get('brand')} {TireManagementState.tire_info_by_id.get(vehicle_tire['tire_id'], {}).get('size', 'N/A')}",
                             class_name="text-sm font-medium",
                         ),
+                        
+                        
                         rx.el.p(
                             f"Instalado: {vehicle_tire['fecha_instalacion']}",
                             class_name="text-xs text-gray-500",
@@ -259,6 +444,7 @@ def vehicle_detail_modal() -> rx.Component:
                         on_click=lambda: TireManagementState.open_add_tire_to_vehicle_modal(
                             TireManagementState.selected_vehicle_for_detail[0]["id"],
                             AuthState.current_user["cliente_id"],
+                            AuthState.current_user["id"],
                             position,
                         ),
                         class_name="mt-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm py-2 px-3 rounded-md",
@@ -308,18 +494,22 @@ def vehicle_detail_modal() -> rx.Component:
                 # ),
                 rx.el.div(
                     rx.hstack(
-                        rx.vstack(
-                            image_map_view(),
-                            rx.box(
-                                
-                                rx.text("Haga clic en las áreas designadas para gestionar las llantas.", size="2"),
-                                padding="4",
+                        rx.desktop_only(
+                            rx.vstack(                           
+                                image_map_view(),
+                                rx.box(
+                                    
+                                    rx.text("area de revisión", size="2"),
+                                    padding="4",
 
+                                ),
+                                direction="column",
+                                gap="4",
                             ),
-                            direction="column",
-                            gap="4",
                         ),
+                        
                         rx.el.div(
+                            
                             rx.foreach(
                                 TireManagementState.vehicle_tires_by_position.keys(),
                                 lambda position: get_tire_card(
@@ -327,7 +517,8 @@ def vehicle_detail_modal() -> rx.Component:
                                     TireManagementState.vehicle_tires_by_position[position],
                                 ),
                             ),
-                            class_name="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4 py-6",
+                            class_name="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4 py-6 max-h-[60vh] overflow-y-auto",
+                            #class_name="space-y-3 py-4 max-h-[50vh] overflow-y-auto"
                         ),
                         gap="8",
                         class_name="items-start",
@@ -346,12 +537,18 @@ def add_tire_to_vehicle_modal() -> rx.Component:
         TireManagementState.show_add_tire_modal,
         rx.el.div(
             rx.el.div(
-                rx.el.h2(
-                    f"Añadir LLanta para {TireManagementState.new_vehicle_tire['position'].replace('_', ' ').title()}",
-                    class_name="text-xl font-bold",
-                ),
+                # rx.el.h2(
+                #     f"Añadir LLanta para {TireManagementState.new_vehicle_tire['position'].replace('_', ' ').title()}",
+                #     class_name="text-xl font-bold",
+                # ),
                 rx.form.root(
                     rx.flex(
+                        form_field_input_desabilitado(
+                            "Añadir Llanta para",
+                            TireManagementState.new_vehicle_tire['position'],
+                            "position",
+                            "text",
+                        ),
                         form_field_despegable(
                             "Selecionar Llanta",
                             TireManagementState.tires_all_options,
@@ -373,7 +570,21 @@ def add_tire_to_vehicle_modal() -> rx.Component:
                             "profundidad_actual",
                             "number",
                             4,
-                        ),  
+                        ), 
+                        form_field_input(
+                            "Odometro Lectura",
+                            "Odometro Lectura",
+                            "odometro_actual",
+                            "number",
+                            6,
+                        ),
+                        form_field_input(
+                            "Presion Inicial (PSI)",
+                            "Presion Inicial (PSI)",
+                            "presion_tire_actual",
+                            "number",
+                            4,
+                        ),
                         form_field_despegable(
                             "Estado Inicial",
                             ["Nueva", "En uso"],
@@ -519,7 +730,7 @@ def tire_history_modal() -> rx.Component:
             rx.el.div(
                 rx.el.div(
                     rx.el.h2(
-                        f"History for {TireManagementState.tire_info_for_history.get('brand', 'N/A')} {TireManagementState.tire_info_for_history.get('model', 'N/A')}",
+                        f"History for {TireManagementState.tire_info_for_history.get('brand','N/A')} {TireManagementState.tire_info_for_history.get('size', 'N/A')}",
                         class_name="text-xl font-bold",
                     ),
                     rx.el.button(
@@ -533,10 +744,10 @@ def tire_history_modal() -> rx.Component:
                     rx.el.table(
                         rx.el.thead(
                             rx.el.tr(
-                                rx.el.th("Date", class_name="p-2 text-left"),
-                                rx.el.th("Event", class_name="p-2 text-left"),
-                                rx.el.th("Depth", class_name="p-2 text-left"),
-                                rx.el.th("Notes", class_name="p-2 text-left"),
+                                rx.el.th("Fecha", class_name="p-2 text-left"),
+                                rx.el.th("Evento", class_name="p-2 text-left"),
+                                rx.el.th("Profun", class_name="p-2 text-left"),
+                                rx.el.th("Notas", class_name="p-2 text-left"),
                             )
                         ),
                         rx.el.tbody(
@@ -559,25 +770,27 @@ def tire_history_modal() -> rx.Component:
 def vehicles_page_ui() -> rx.Component:
     return rx.el.div(
         rx.el.div(
-            # rx.el.h1("Mantenimiento Vehículo", 
-            #     class_name="text-2xl font-bold"),
-            rx.el.p(
-                "Registre y gestione sus vehículos",
-                class_name="text-sm text-gray-500 mt-1",
-            ),
-            rx.el.button(
-                "Nuevo",
-                on_click=VehicleState.open_add_vehicle_modal(
-                    AuthState.current_user["username"],
-                    AuthState.current_user["cliente_id"]),
-                class_name="mt-4 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700",
-            ),
-             rx.button(
+            rx.el.h1("Mantenimiento Vehículo", 
+                 class_name="text-2xl font-bold"),
+            # rx.el.p(
+            #     "Registre y gestione sus vehículos",
+            #     class_name="text-sm text-gray-500 mt-1",
+            # ),
+            # rx.el.button(
+            #     "Nuevo",
+            #     on_click=VehicleState.open_add_vehicle_modal(
+            #         AuthState.current_user["username"],
+            #         AuthState.current_user["cliente_id"]),
+            #     class_name="mt-4 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700",
+            # ),
+            vehicle_new_edit(),
+            rx.button(
                 rx.icon("table-cells-split", size=20),
                 rx.text("Mostrar", size="3"),
                 on_click=VehicleState.mostrar_vehiculos(AuthState.current_user["cliente_id"]),
             ),
-            class_name="mb-6",
+            
+            class_name="mb-6 px-4 py-2 ",
         ),
         rx.el.div(
             rx.foreach(VehicleState.vehicles, vehicle_card),
@@ -586,6 +799,6 @@ def vehicles_page_ui() -> rx.Component:
         #vehicle_modal(),
         #vehicle_detail_modal(),
         add_tire_to_vehicle_modal(),
-        #tire_history_modal(),
+        tire_history_modal(),
         class_name="p-4 md:p-6",
     )

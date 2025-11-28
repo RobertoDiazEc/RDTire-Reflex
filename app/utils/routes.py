@@ -15,6 +15,8 @@ class Route(Enum):
     INVENTORY = "/redxtire/inventory"
     SALES = "/redxtire/sales"
     ANALYTICS = "/redxtire/analytics"
+    INICIACION_TIRE = "/setup-admin"
+    INSPECTIONSVEHICLE = "/redxtire/inspection-vehicle"
 
     # CONTACTOS = "/contactos"
     # PRODUCTOS = "/productos"

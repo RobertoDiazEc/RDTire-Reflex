@@ -1,12 +1,17 @@
 import reflex as rx
 from app.states.inspections_state import InspectionState
+from app.states.vehicle_state import VehicleState
 from app.states.base_state import Vehicle, VehicleTire
+from app.components.inspeccion_proceso import tire_inspection_row, tire_ajuste_presion_row, tire_rotacion_row
 
 
 def inspection_vehicle_card(vehicle: Vehicle) -> rx.Component:
     return rx.el.div(
         rx.el.div(
-            rx.el.h3(vehicle["placa"], class_name="text-lg font-bold"),
+            
+            rx.el.h3(
+                rx.icon("truck",  color="#14e9c5f2"),
+                vehicle["placa"], class_name="text-lg font-bold"),
             rx.el.p(
                 f"{vehicle['marca']} {vehicle['modelo']}",
                 class_name="text-sm text-gray-500",
@@ -14,7 +19,7 @@ def inspection_vehicle_card(vehicle: Vehicle) -> rx.Component:
             class_name="flex-grow",
         ),
         rx.el.button(
-            "Iniciar Inspección",
+            f"Iniciar {InspectionState.inspeccion_valor}",
             on_click=lambda: InspectionState.open_inspection_modal(vehicle),
             class_name="mt-4 w-full bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors",
         ),
@@ -22,38 +27,7 @@ def inspection_vehicle_card(vehicle: Vehicle) -> rx.Component:
     )
 
 
-def inspection_modal() -> rx.Component:
-    def tire_inspection_row(vehicle_tire: VehicleTire) -> rx.Component:
-        tire_info = InspectionState.tire_info_by_id.get(vehicle_tire["tire_id"], {})
-        return rx.el.div(
-            rx.el.div(
-                rx.el.p(
-                    vehicle_tire["position"].replace("_", " ").title(),
-                    class_name="font-semibold",
-                ),
-                rx.el.p(
-                    f"{tire_info.get('brand', 'N/A')} {tire_info.get('model', 'N/A')}",
-                    class_name="text-sm text-gray-600",
-                ),
-                class_name="w-1/3",
-            ),
-            rx.el.div(
-                rx.el.input(
-                    type="number",
-                    default_value=InspectionState.inspection_depths.get(
-                        vehicle_tire["id"], ""
-                    ),
-                    on_change=lambda val: InspectionState.handle_depth_change(
-                        vehicle_tire["id"], val
-                    ),
-                    class_name="w-full p-2 border rounded-md",
-                    placeholder="Profundidad (mm)",
-                ),
-                class_name="w-1/3",
-            ),
-            class_name="flex items-center justify-between gap-4 p-3 bg-gray-50 rounded-md",
-        )
-
+def inspection_modal() -> rx.Component:         
     return rx.cond(
         InspectionState.show_inspection_modal
         & (InspectionState.selected_vehicle_for_inspection != None),
@@ -61,9 +35,10 @@ def inspection_modal() -> rx.Component:
             rx.el.div(
                 rx.el.div(
                     rx.el.h2(
-                        f"Inspección para {InspectionState.selected_vehicle_for_inspection['placa']}",
+                        f"{InspectionState.inspeccion_valor} para {InspectionState.selected_vehicle_for_inspection['placa']}",
                         class_name="text-2xl font-bold",
                     ),
+                    rx.moment(InspectionState.date_now, format="YYYY-MM-DD"),
                     rx.el.button(
                         rx.icon("x"),
                         on_click=InspectionState.close_inspection_modal,
@@ -73,18 +48,56 @@ def inspection_modal() -> rx.Component:
                 ),
                 rx.el.form(
                     rx.el.div(
-                        rx.foreach(
-                            InspectionState.current_inspection_tires,
-                            tire_inspection_row,
+                        rx.el.label("Odometro Actual ", class_name="font-medium"),
+                        rx.badge(f"{InspectionState.selected_vehicle_for_inspection['odometro_actual']}",
+                            color_scheme="jade", variant="soft", high_contrast=False, ),
+                        rx.input(
+                            #value=InspectionState.current_inspection_tiresodometro_actual,
+                            #on_change=InspectionState.set_inspection_odometro,
+                            placeholder="e.g. 12000",
+                            type="number",
+                            #class_name="w-full p-2 border rounded-md mt-1 h-24",
+                        ),
+                        class_name="mt-4",
+                    ),
+                    rx.el.div(
+                        rx.cond(
+                            InspectionState.inspeccion_valor == "Inspección",
+                            rx.foreach(
+                                InspectionState.current_inspection_tires,
+                                #InspectionState.inspection_tires_by_position.keys(),
+                                lambda llanta, i: tire_inspection_row(llanta, i),
+                            ),
+                        ),
+                        rx.cond(
+                            InspectionState.inspeccion_valor == "Ajuste Presión",
+                            rx.foreach(
+                                InspectionState.current_inspection_tires,
+                                lambda llanta, i: tire_ajuste_presion_row(llanta, i),
+                            ),
+                        ),
+                        rx.cond(
+                            InspectionState.inspeccion_valor == "Rotación",
+                            rx.box(
+                                rx.badge(InspectionState.rotacion_item, color_scheme="green"),
+                                rx.radio(["Radial", "Convencional"], on_change=InspectionState.set_rotacion_item, direction="row"),
+                                rx.foreach(
+                                    #InspectionState.current_inspection_tires,
+                                    InspectionState.inspection_tires_by_position.keys(),
+                                    lambda llanta, i: tire_rotacion_row(InspectionState.inspection_tires_by_position[llanta], i),
+                                ),
+                            ),
                         ),
                         class_name="space-y-3 py-4 max-h-[50vh] overflow-y-auto",
                     ),
+                   
                     rx.el.div(
                         rx.el.label("Notas de Inspección", class_name="font-medium"),
                         rx.text_area(
-                            on_change=InspectionState.set_inspection_notes,
+                            value=InspectionState.inspection_notes,
+                            #on_change=InspectionState.set_inspection_notes,
                             placeholder="Añadir notas sobre la inspección...",
-                            class_name="w-full p-2 border rounded-md mt-1 h-24",
+                            #class_name="w-full p-2 border rounded-md mt-1 h-24",
                         ),
                         class_name="mt-4",
                     ),
@@ -114,12 +127,20 @@ def inspection_modal() -> rx.Component:
 def inspections_ui() -> rx.Component:
     return rx.el.div(
         rx.el.div(
-            rx.el.h1("Inspección", class_name="text-3xl font-bold"),
-            rx.el.p(
-                "Seleccione un vehículo para iniciar la inspección de llantas.",
-                class_name="text-gray-500 mt-1",
+            rx.el.h1("Inspección", class_name="text-3xl font-bold"),            
+            rx.select(
+                ["Inspección", "Ajuste Presión", "Rotación", "Montaje", "Desmontaje / Baja", "Reparacion"],
+                value=InspectionState.inspeccion_valor,
+                on_change=InspectionState.change_inspeccion_valor,
             ),
-            class_name="mb-6",
+            
+            rx.button(
+                rx.icon("table-cells-split", size=20),
+                rx.text("Seleccione un vehículo para iniciar ", size="3"),
+                on_click=VehicleState.mostrar_vehiculos(InspectionState.cliente_id_global),
+            ),
+
+            class_name="mb-3",
         ),
         rx.el.div(
             rx.foreach(

@@ -32,6 +32,23 @@ def form_field_input(titulo: str, placehol: str, nombre: str, tipo: str, max: in
         flex_direction=["column", "row", "column"],
     )
 
+def form_field_input_desabilitado(titulo: str, placehol: str, nombre: str, tipo: str) -> rx.Component:
+    return rx.flex(
+        rx.badge(titulo, variant="solid", high_contrast=True, size="3"),
+        rx.input(
+            value=placehol,
+            name=nombre,
+            type= tipo,
+            read_only=True,
+        #on_blur="",
+            size="3",
+            color_scheme="blue",
+        ),
+        width="100%",
+        padding="2",
+        flex_direction=["column", "row", "column"],
+    )
+
 
 def form_field_onblur(label: str, name: str, type: str, on_blur) -> rx.Component:
     return rx.form.field(
@@ -75,6 +92,20 @@ def form_field_change(label: str, name: str, value: str, placeholder: str, type:
                 class_name="w-full p-2 border border-gray-100 rounded-md mt-1",
             ),
         )
+
+def form_field_change_real(label: str,name: str, value: rx.Var, on_change: rx.event.EventHandler, placeholder: str, type: str = "text",) -> rx.Component:
+    return rx.el.div(
+        rx.el.label(label, class_name="text-sm font-medium"),
+        rx.el.input(
+            placeholder=placeholder,
+            name=name,
+            type=type,
+            default_value=value,
+            on_change=on_change,
+            class_name="w-full p-2 border rounded-md mt-1",
+        ),
+        class_name="flex-1",
+    )
 
 def form_field_password(label: str, name: str,  placeholder: str, type: str, read_only: bool) -> rx.Component:
         return rx.el.div(

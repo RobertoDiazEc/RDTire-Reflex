@@ -1,5 +1,5 @@
 
-reflex==0.8.17
+reflex==0.8.20
 PyGithub
 httpx
 sqlalchemy

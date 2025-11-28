@@ -1,10 +1,11 @@
 import reflex as rx
-from app.states.base_state import BaseState, Tire
+from app.states.base_state import Tire
+from app.states.tires_state import TiresState
 import datetime
 import logging
 
 
-class InventoryState(BaseState):
+class InventoryState(TiresState):
     show_adjustment_modal: bool = False
     selected_tire_for_adjustment: Tire | None = None
     adjustment_amount: str = "0"

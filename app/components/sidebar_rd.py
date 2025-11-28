@@ -12,22 +12,29 @@ from app.states.auth_state import AuthState
 def sidebar_item(item: dict) -> rx.Component:
     return rx.link(
         rx.hstack(
-            rx.icon(item["icon"], size=20),
-            rx.text(item["name"], size="2"),
+            rx.icon(item["icon"], size=20, color="#14e9c5f2"),
+            rx.text(item["name"], size="3", color="#fbfdfdf1"),
             width="100%",
-            # padding_x="0.5rem",
-            # padding_y="0.5rem",
+            #padding_x="0.5rem",
+            #padding_y="0.5rem",
             align="center",
             style={
                 "_hover": {
-                    "bg": rx.color("accent", 4),
-                    "color": rx.color("accent", 11),
+                    "bg": rx.color("cyan"),
+                    "color": "#0b0c0cf1", 
                 },
-                "border-radius": "0.5em",
+                "border-radius": "1.5em",
             },
         ),
         href=item["path"],
         underline="none",
+        color_scheme="cyan",
+        style={
+                "_hover": {
+                    "color": "#0b0c0cf1", 
+                },
+ 
+            },
         weight="medium",
         width="100%",
     )
@@ -58,11 +65,12 @@ def sidebar_redx() -> rx.Component:
                     
                     rx.box(
                         rx.flex(
-                            rx.icon("circle-dot", color="#14e9c5f2",),
-                            rx.text("RDTire-APP", size="5", weight="medium"),
+                            rx.icon("circle-dot", color="#14e9c5f2", size=20),
+                            rx.text("RDTire-APP", size="5", weight="medium", color="#fbfcfcf1"),
                             
                             direction="row",
                             gap="3",
+                            padding="2",
                             align="center",
                         ),
                         size="2",
@@ -81,13 +89,14 @@ def sidebar_redx() -> rx.Component:
                 rx.spacer(),
                 rx.vstack(
                     rx.vstack(
+                        rx.text(AuthState.cliente_actual['nombre'], size="5", weight="medium", color="#fbfdfdf1"),
                         rx.el.button(
-                            rx.icon("log-out", class_name="mr-2 h-4 w-4"),
-                            "Logout",
+                            rx.icon("log-out", color="#14e9c5f2"),
+                            "Salir ",
                             on_click=AuthState.logout,
-                            class_name="flex items-center text-sm font-medium text-gray-600 hover:text-red-600 transition-colors",
+                            class_name="flex items-center text-lm font-medium text-gray-400 hover:text-red-400 transition-colors",
                         ),
-                       
+                        
                         spacing="1",
                         width="100%",
                     ),
@@ -96,8 +105,8 @@ def sidebar_redx() -> rx.Component:
                         rx.icon_button(rx.icon("user", size=20)),
                         rx.vstack(
                             rx.box(
-                                rx.text(AuthState.current_user["username"], size="3", weight="bold"),
-                                rx.text(AuthState.current_user["email"], size="2", weight="medium"),
+                                rx.text(AuthState.current_user["username"], size="3", weight="bold", color="#fbfdfdf1"),
+                                rx.text(AuthState.current_user["email"], size="2", weight="medium", color="#08f1f1e8"),
                                 width="100%",
                             ),
                             spacing="0",
@@ -117,10 +126,10 @@ def sidebar_redx() -> rx.Component:
                 # position="fixed",
                 # left="0px",
                 # top="0px",
-                # z_index="5",
+                #z_index="100",
                 padding_x="1em",
                 padding_y="1.5em",
-                bg="#e5eeecff",
+                bg="#063852",
                 align="start",
                 # height="100%",
                 height="650px",

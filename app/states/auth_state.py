@@ -4,30 +4,25 @@ import bcrypt
 from typing import TypedDict, Literal
 import hashlib
 import logging
-from app.database.config import get_db, get_tenant_db
+from app.states.base_state import BaseState
 from app.database.db_rdtire import Usuario, Cliente
 from decouple import config
 
 USER_MAESTRO_REDX = config("USER_MAESTRO_REDX")
 PASSWORD_MAESTRO_REDX = config("PASSWORD_MAESTRO_REDX")
 
-BASE_API_URL = "tu_url_api_aqui"
+# BASE_API_URL = "tu_url_api_aqui"
 Role = Literal["Administrador", "Usuario Administrador", "Usuario Técnico"]
 
 
-class User(TypedDict):
-    username: str
-    password_hash: str
-    role: Role
-    client_id: int
-    schema_name: str
 
 
-class AuthState(rx.State):
+
+class AuthState(BaseState):
     error_message: str = ""
     is_authenticated: bool = False
     #current_user: User | None = None
-    current_user: Usuario | None = Usuario()
+    current_user: Usuario = Usuario()
     cliente_actual: Cliente = Cliente()
     user_role: str = ""
     intent_login: bool = False
@@ -46,7 +41,7 @@ class AuthState(rx.State):
         pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
         if not re.match(pattern, username):
             return rx.window_alert("Correo no válido")
-        print( username + " -- " + password)
+        #print( username + " -- " + password)
         self.numero_intentos = self.numero_intentos + 1
         try:
             if self.numero_intentos > 4:
@@ -123,7 +118,11 @@ class AuthState(rx.State):
     def require_login(self) -> rx.event.EventSpec | None:
         if not self.is_authenticated:
             return rx.redirect("/login")
-        return None
+        return self.inicializar_datos()
+    
+    @rx.event
+    def inicializar_datos(self):
+        self.cliente_id_global = self.cliente_id_actual
 
     @rx.event
     def require_role(self, required_roles: list[Role]) -> rx.event.EventSpec | None:
@@ -135,3 +134,18 @@ class AuthState(rx.State):
             )
             return rx.redirect("/")
         return None
+    
+    @rx.event
+    def hash_password(password: str) -> str:
+        """Genera un hash seguro de la contraseña usando bcrypt."""
+        
+        # 1. Generar un 'salt' (valor aleatorio) único para esta contraseña.
+        # El salt ayuda a proteger contra ataques de tablas arcoíris.
+        salt = bcrypt.gensalt()
+        
+        # 2. Generar el hash combinando la contraseña con el salt.
+        # Necesitas codificar la contraseña a bytes antes de hashear.
+        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+        
+        # 3. Decodificar a str para guardar en la base de datos (PostgreSQL/SQLModel)
+        return hashed.decode('utf-8')

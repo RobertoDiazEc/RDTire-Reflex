@@ -1,5 +1,6 @@
 import reflex as rx
-from app.states.base_state import BaseState, Tire, Sale, SaleItem, Customer
+from app.states.base_state import Tire, Sale, SaleItem, Customer
+from app.states.tires_state import TiresState
 import datetime
 from typing import TypedDict
 
@@ -9,7 +10,7 @@ class CartItem(TypedDict):
     quantity: int
 
 
-class SalesState(BaseState):
+class SalesState(TiresState):
     cart_items: list[CartItem] = []
     selected_customer_id: str = ""
     payment_method: str = "card"

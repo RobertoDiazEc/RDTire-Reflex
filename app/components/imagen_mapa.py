@@ -33,7 +33,7 @@ def clickable_area(top: str, bottom: str, left: str, right: str,
 def image_map_view() -> rx.Component:
     return rx.box(
          rx.image(
-                src="static/imagen/llanta_2eje_4llantas.png",
+                src="/static/imagen/llanta_2eje_4llantas.png",
                 alt="Mapa de Imagen con Áreas Clickeables",
                 width="300px",
                 height="400px",

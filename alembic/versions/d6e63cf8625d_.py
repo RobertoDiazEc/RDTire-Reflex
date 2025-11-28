@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: ee96a72b03a0
+Revision ID: d6e63cf8625d
 Revises: 
-Create Date: 2025-11-03 18:12:50.306235
+Create Date: 2025-11-17 11:22:33.082044
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 import sqlmodel
 
 # revision identifiers, used by Alembic.
-revision: str = 'ee96a72b03a0'
+revision: str = 'd6e63cf8625d'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -55,6 +55,30 @@ def upgrade() -> None:
     sa.Column('fecha_creacion', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('inventoryadjustment',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('timestamp', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('reason', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('amount', sa.Integer(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('menu',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('nombre', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('icon', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('orden', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('nombre')
+    )
+    op.create_table('menus_roles',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('menu', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('rol', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('icon', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('orden', sa.Integer(), nullable=True),
+    sa.Column('path', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('roles',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('nombre', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -74,19 +98,28 @@ def upgrade() -> None:
     op.create_table('tire',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('brand', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('model', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('size', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('size', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('dot', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('model', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('season', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('speed_rating', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('load_index', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('price', sa.Float(), nullable=True),
     sa.Column('stock', sa.Integer(), nullable=True),
+    sa.Column('asignado_a_vehiculo', sa.Boolean(), nullable=False),
+    sa.Column('estado', sqlmodel.sql.sqltypes.AutoString(length=3), nullable=False),
     sa.Column('image_url', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('fecha_creacion', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('fecha_actualizacion', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('cliente_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['cliente_id'], ['cliente.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    with op.batch_alter_table('tire', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_tire_brand'), ['brand'], unique=False)
+        batch_op.create_index(batch_op.f('ix_tire_size'), ['size'], unique=False)
+
     op.create_table('usuario',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -112,6 +145,9 @@ def upgrade() -> None:
     sa.Column('modelo', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('anio', sa.Integer(), nullable=True),
     sa.Column('tipo', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('estado', sqlmodel.sql.sqltypes.AutoString(length=2), nullable=False),
+    sa.Column('creado_por', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('odometro_actual', sa.Integer(), nullable=False),
     sa.Column('fecha_registro', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('cliente_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['cliente_id'], ['cliente.id'], ),
@@ -134,7 +170,9 @@ def upgrade() -> None:
     sa.Column('position', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('fecha_instalacion', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('estado', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('profundidad_actual', sa.Float(), nullable=True),
+    sa.Column('profundidad_actual', sa.Float(), nullable=False),
+    sa.Column('odometro_actual', sa.Integer(), nullable=False),
+    sa.Column('presion_tire_actual', sa.Integer(), nullable=False),
     sa.Column('tire_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['tire_id'], ['tire.id'], ),
     sa.ForeignKeyConstraint(['vehicle_id'], ['vehiculo.id'], ),
@@ -146,10 +184,14 @@ def upgrade() -> None:
     sa.Column('tipo_evento', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('fecha', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('notas', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('profundidad_medida', sa.Float(), nullable=True),
+    sa.Column('profundidad_medida', sa.Float(), nullable=False),
+    sa.Column('odometro_lectura', sa.Integer(), nullable=False),
+    sa.Column('presion_tire', sa.Integer(), nullable=False),
     sa.Column('realizador', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('cliente_id', sa.Integer(), nullable=False),
+    sa.Column('usuario_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['cliente_id'], ['cliente.id'], ),
+    sa.ForeignKeyConstraint(['usuario_id'], ['usuario.id'], ),
     sa.ForeignKeyConstraint(['vehicletireid'], ['vehicletire.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -167,9 +209,16 @@ def downgrade() -> None:
         batch_op.drop_index(batch_op.f('ix_usuario_email'))
 
     op.drop_table('usuario')
+    with op.batch_alter_table('tire', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_tire_size'))
+        batch_op.drop_index(batch_op.f('ix_tire_brand'))
+
     op.drop_table('tire')
     op.drop_table('sale')
     op.drop_table('roles')
+    op.drop_table('menus_roles')
+    op.drop_table('menu')
+    op.drop_table('inventoryadjustment')
     op.drop_table('customer')
     op.drop_table('cuenta_temporal')
     op.drop_table('cliente')

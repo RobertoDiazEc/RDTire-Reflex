@@ -1,4 +1,31 @@
 from app.utils.routes import Route
+from enum import Enum
+
+
+class TireEventType(str, Enum):
+    INSPECCION   = "INSPECCION"
+    AJUSTE_PRESION = "AJUSTE_PRESION"
+    ROTACION     = "ROTACION"
+    MONTAJE      = "MONTAJE"
+    DESMONTAJE   = "DESMONTAJE"
+    BAJA         = "BAJA"        # puedes usar solo BAJA y no DESMONTAJE si quieres
+    REPARACION   = "REPARACION"
+    OTRO         = "OTRO"
+
+class NumeroLlantas(int, Enum):
+    EJE_SIMPLE = 4
+    EJE_DOBLE = 6
+
+class MotivoBaja(str, Enum):
+    DESGASTE = "Desgaste"
+    DAÑO_IRREPARABLE = "Daño Irreparable"
+    CORTE_LATERAL = "Corte lateral"
+
+class TipoReparacion(str, Enum):
+    PARCHE_INTERNO = "Parche Interno"
+    PARQUE_LATERAL = "Parche Lateral"
+    REENCAUCHE = "Reencauche"
+    BALANCEO = "Balanceo"
 
 NOMBRE_APLICACION = "RDTire-APP"
 
